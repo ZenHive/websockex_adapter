@@ -29,12 +29,191 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 - Real API testing only - zero mocks
 
 ## Current Tasks
-| ID      | Description                                      | Status     | Priority | Assignee | Review Rating |
-| ------- | ------------------------------------------------ | ---------- | -------- | -------- | ------------- |
-| WNX0026 | Prepare for Hex.pm Publishing                    | Planned    | High     |          |               |
+| ID        | Description                                      | Status      | Priority | Assignee | Review Rating |
+| --------- | ------------------------------------------------ | ----------- | -------- | -------- | ------------- |
+| WNX0026   | Prepare for Hex.pm Publishing                    | Planned     | High     |          |               |
+| WNX0027   | Ensure All Examples Have Working Implementations | In Progress | High     |          |               |
+| WNX0027.1 | ├─ Implement RateLimitedClient Example          | Planned     | High     |          |               |
+| WNX0027.2 | ├─ Implement MyTradingSystem Example            | Planned     | Medium   |          |               |
+| WNX0027.3 | ├─ Implement DeribitMarketDataHandler Example   | Planned     | Medium   |          |               |
+| WNX0027.4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned     | Low      |          |               |
+| WNX0027.5 | └─ Implement BatchSubscriptionManager Example    | Planned     | High     |          |               |
 
 ## Implementation Order
 1. **WNX0026**: Prepare for Hex.pm Publishing - Essential for package distribution
+2. **WNX0027**: Ensure All Examples Have Working Implementations - Critical for documentation quality
+
+## Task Details
+
+### WNX0027: Ensure All Examples Have Working Implementations (Parent Task)
+**Description**: Every code example shown in docs/Examples.md must have a corresponding working implementation module and comprehensive tests to ensure documentation accuracy and prevent drift.
+
+**Status**: In Progress
+**Priority**: High
+
+**Sub-tasks**:
+- WNX0027.1: Implement RateLimitedClient Example
+- WNX0027.2: Implement MyTradingSystem Example  
+- WNX0027.3: Implement DeribitMarketDataHandler Example
+- WNX0027.4: Implement DeribitTelemetryAdapter Example
+- WNX0027.5: Implement BatchSubscriptionManager Example
+
+---
+
+### WNX0027.1: Implement RateLimitedClient Example
+**Description**: Create working implementation and tests for the RateLimitedClient example shown in docs/Examples.md (line 154).
+
+**Simplicity Principle**: Minimal wrapper showing how to integrate rate limiting with WebSocket operations.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/rate_limited_client.ex`
+- Implement `send_order/3` function as shown in documentation
+- Maximum 3-4 functions demonstrating rate-limited operations
+- Create comprehensive tests in `test/websockex_adapter/examples/rate_limited_client_test.exs`
+
+**Test Scenarios**:
+- Test successful order when under rate limit
+- Test rate limit rejection when over limit
+- Test batch operations with mixed success/rejection
+- Integration test with real WebSocket connection
+
+**Status**: Planned
+**Priority**: High
+**Estimated LOC**: ~50 lines
+
+---
+
+### WNX0027.2: Implement MyTradingSystem Example
+**Description**: Create working implementation for the MyTradingSystem advanced Deribit features example (line 273).
+
+**Simplicity Principle**: Show advanced Deribit features without creating a full trading system.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/my_trading_system.ex`
+- Implement `setup_risk_management/1` and `get_market_state/2` functions
+- Use Task.async for parallel data fetching as shown
+- Create tests verifying risk management setup and market state retrieval
+
+**Test Scenarios**:
+- Test cancel-on-disconnect setup
+- Test heartbeat configuration
+- Test parallel market data fetching
+- Mock responses for non-critical API calls to avoid rate limits
+
+**Status**: Planned  
+**Priority**: Medium
+**Estimated LOC**: ~80 lines
+
+---
+
+### WNX0027.3: Implement DeribitMarketDataHandler Example
+**Description**: Create the high-frequency market data handler GenServer example (line 351).
+
+**Simplicity Principle**: Focus on buffering and batch processing patterns, not full trading logic.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/deribit_market_data_handler.ex`
+- Implement GenServer with message buffering
+- Show batch processing of orderbook and trade updates
+- Demonstrate telemetry integration for metrics
+- Create comprehensive GenServer tests
+
+**Test Scenarios**:
+- Test buffer filling and automatic flush
+- Test periodic flush timer
+- Test orderbook update batching
+- Test trade statistics calculation (VWAP)
+- Test telemetry event emission
+
+**Status**: Planned
+**Priority**: Medium  
+**Estimated LOC**: ~200 lines (largest example)
+
+---
+
+### WNX0027.4: Implement DeribitTelemetryAdapter Example
+**Description**: Create telemetry wrapper showing monitoring best practices (line 524).
+
+**Simplicity Principle**: Thin wrapper adding telemetry to existing adapter functions.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/deribit_telemetry_adapter.ex`
+- Wrap key DeribitAdapter functions with telemetry
+- Implement connection health monitoring
+- Show telemetry handler setup
+- Create tests verifying telemetry events
+
+**Test Scenarios**:
+- Test connection attempt telemetry
+- Test request/response timing metrics  
+- Test subscription telemetry
+- Test health check monitoring
+- Verify telemetry event payloads
+
+**Status**: Planned
+**Priority**: Low
+**Estimated LOC**: ~150 lines
+
+---
+
+---
+
+### WNX0027.5: Implement BatchSubscriptionManager Example
+**Description**: Create example showing how to batch subscriptions to avoid overwhelming Deribit's API with too many simultaneous subscription requests.
+
+**Simplicity Principle**: Simple GenServer that queues and batches subscription requests with configurable batch size and delay.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/batch_subscription_manager.ex`
+- Implement subscription batching with configurable batch size (e.g., 10 channels at a time)
+- Add delay between batches to respect API limits
+- Show progress tracking and error handling
+- Create tests verifying batching behavior
+
+**Implementation Details**:
+- Maximum batch size: 10 channels (Deribit recommendation)
+- Delay between batches: 100-500ms
+- Queue subscriptions and process in FIFO order
+- Handle partial batch failures gracefully
+- Provide subscription status feedback
+
+**Test Scenarios**:
+- Test batching of 50+ subscriptions into chunks of 10
+- Test delay between batch submissions
+- Test handling of subscription failures in a batch
+- Test subscription queue management
+- Integration test with real Deribit API
+
+**Example Usage**:
+```elixir
+# Instead of subscribing to 50 channels at once
+{:ok, manager} = BatchSubscriptionManager.start_link(
+  adapter: deribit_adapter,
+  batch_size: 10,
+  batch_delay: 200
+)
+
+# Queue all subscriptions - they'll be sent in batches
+channels = for i <- 1..50, do: "book.BTC-#{i}JUN25.raw"
+{:ok, request_id} = BatchSubscriptionManager.subscribe_batch(manager, channels)
+
+# Check progress
+{:ok, %{completed: 30, pending: 20, failed: 0}} = 
+  BatchSubscriptionManager.get_status(manager, request_id)
+```
+
+**Status**: Planned
+**Priority**: High
+**Estimated LOC**: ~120 lines
+
+---
+
+**Implementation Order**:
+1. **WNX0027.5** - BatchSubscriptionManager (critical for production use)
+2. **WNX0027.1** - RateLimitedClient (simplest, most reusable)
+3. **WNX0027.2** - MyTradingSystem (builds on Deribit adapter)
+4. **WNX0027.3** - DeribitMarketDataHandler (most complex GenServer)
+5. **WNX0027.4** - DeribitTelemetryAdapter (optional enhancement)
 
 ## Completed Tasks
 | ID      | Description                                      | Status    | Priority | Assignee | Review Rating | Archive Location |

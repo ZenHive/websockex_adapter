@@ -207,83 +207,97 @@ defmodule MyApp.ConnectionManager do
 end
 ```
 
-## Custom Adapters
+## Deribit Exchange Adapter
 
-### Building a Custom Exchange Adapter
+### Using the Real Deribit Adapter
 
 ```elixir
-defmodule MyExchangeAdapter do
-  use GenServer
-  require Logger
+# Basic connection with authentication
+{:ok, adapter} = WebsockexAdapter.Examples.DeribitAdapter.connect(
+  client_id: System.get_env("DERIBIT_CLIENT_ID"),
+  client_secret: System.get_env("DERIBIT_CLIENT_SECRET"),
+  url: "wss://test.deribit.com/ws/api/v2"
+)
 
-  defstruct [:client, :api_key, :subscriptions]
+# Subscribe to market data
+{:ok, _} = WebsockexAdapter.Examples.DeribitAdapter.subscribe(adapter, [
+  "book.BTC-PERPETUAL.raw",
+  "trades.BTC-PERPETUAL.raw"
+])
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts, name: opts[:name])
-  end
+# Place an order
+{:ok, order} = WebsockexAdapter.Examples.DeribitAdapter.buy(
+  adapter,
+  instrument_name: "BTC-PERPETUAL",
+  amount: 100,
+  type: "limit",
+  price: 45000
+)
 
-  def init(opts) do
-    url = Keyword.fetch!(opts, :url)
-    api_key = Keyword.fetch!(opts, :api_key)
+# Get account summary
+{:ok, summary} = WebsockexAdapter.Examples.DeribitAdapter.get_account_summary(
+  adapter,
+  currency: "BTC"
+)
+```
+
+### Using the Supervised GenServer Adapter
+
+```elixir
+# Start the supervised adapter
+{:ok, adapter} = WebsockexAdapter.Examples.DeribitGenServerAdapter.start_link(
+  name: MyApp.DeribitAdapter,
+  client_id: System.get_env("DERIBIT_CLIENT_ID"),
+  client_secret: System.get_env("DERIBIT_CLIENT_SECRET")
+)
+
+# Authenticate (automatic on reconnection)
+{:ok, _} = WebsockexAdapter.Examples.DeribitGenServerAdapter.authenticate(adapter)
+
+# Subscribe to channels (automatically restored on reconnection)
+{:ok, _} = WebsockexAdapter.Examples.DeribitGenServerAdapter.subscribe(adapter, [
+  "ticker.BTC-PERPETUAL.raw",
+  "book.ETH-PERPETUAL.100ms"
+])
+
+# The adapter handles:
+# - Automatic reconnection on connection loss
+# - Re-authentication after reconnection
+# - Subscription restoration
+# - Heartbeat management
+```
+
+### Advanced Deribit Features
+
+```elixir
+defmodule MyTradingSystem do
+  alias WebsockexAdapter.Examples.DeribitGenServerAdapter, as: Deribit
+  
+  def setup_risk_management(adapter) do
+    # Enable cancel-on-disconnect for safety
+    {:ok, _} = Deribit.send_request(adapter, "private/enable_cancel_on_disconnect")
     
-    case WebsockexAdapter.Client.connect(url) do
-      {:ok, client} ->
-        # Authenticate on connection
-        auth_message = %{
-          "method" => "auth",
-          "params" => %{"api_key" => api_key}
-        }
-        WebsockexAdapter.Client.send_message(client, Jason.encode!(auth_message))
-        
-        {:ok, %__MODULE__{
-          client: client,
-          api_key: api_key,
-          subscriptions: MapSet.new()
-        }}
-      
-      {:error, reason} ->
-        {:stop, reason}
-    end
+    # Set heartbeat interval
+    {:ok, _} = Deribit.send_request(adapter, "public/set_heartbeat", %{
+      interval: 30
+    })
   end
-
-  def subscribe(adapter, channels) do
-    GenServer.call(adapter, {:subscribe, channels})
-  end
-
-  def handle_call({:subscribe, channels}, _from, state) do
-    message = %{
-      "method" => "subscribe",
-      "params" => %{"channels" => channels}
+  
+  def get_market_state(adapter, instrument) do
+    # Get multiple data points in parallel
+    tasks = [
+      Task.async(fn -> Deribit.get_order_book(adapter, instrument_name: instrument) end),
+      Task.async(fn -> Deribit.ticker(adapter, instrument_name: instrument) end),
+      Task.async(fn -> Deribit.get_instruments(adapter, currency: "BTC", kind: "future") end)
+    ]
+    
+    [order_book, ticker, instruments] = Task.await_many(tasks)
+    
+    %{
+      order_book: order_book,
+      ticker: ticker,
+      instruments: instruments
     }
-    
-    case WebsockexAdapter.Client.send_message(state.client, Jason.encode!(message)) do
-      {:ok, _} ->
-        new_subs = Enum.reduce(channels, state.subscriptions, &MapSet.put(&2, &1))
-        {:reply, :ok, %{state | subscriptions: new_subs}}
-      
-      error ->
-        {:reply, error, state}
-    end
-  end
-
-  def handle_info({:websocket_message, message}, state) do
-    case Jason.decode(message) do
-      {:ok, %{"type" => "data", "channel" => channel} = data} ->
-        handle_channel_data(channel, data)
-      
-      {:ok, %{"type" => "error"} = error} ->
-        Logger.error("Exchange error: #{inspect(error)}")
-      
-      _ ->
-        Logger.debug("Unknown message: #{inspect(message)}")
-    end
-    
-    {:noreply, state}
-  end
-
-  defp handle_channel_data(channel, data) do
-    # Process channel-specific data
-    :ok
   end
 end
 ```
@@ -331,84 +345,349 @@ end
 
 ## Performance Optimization
 
-### High-Frequency Message Handling
+### High-Frequency Deribit Market Data Handler
 
 ```elixir
-defmodule HighFrequencyHandler do
+defmodule DeribitMarketDataHandler do
   use GenServer
+  require Logger
+  
+  alias WebsockexAdapter.Examples.DeribitAdapter
 
-  def init(url) do
-    {:ok, client} = WebsockexAdapter.Client.connect(url)
+  defstruct [:adapter, :buffer, :timer, :instruments, :batch_size, :flush_interval]
+
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts, name: opts[:name])
+  end
+
+  def init(opts) do
+    # Connect to Deribit
+    {:ok, adapter} = DeribitAdapter.connect(
+      client_id: opts[:client_id],
+      client_secret: opts[:client_secret],
+      handler: self()  # Route messages to this GenServer
+    )
     
-    # Use a buffer for batch processing
-    {:ok, %{
-      client: client,
-      buffer: [],
-      timer: schedule_flush()
+    # Subscribe to high-frequency channels
+    instruments = opts[:instruments] || ["BTC-PERPETUAL", "ETH-PERPETUAL"]
+    channels = Enum.flat_map(instruments, fn inst ->
+      ["book.#{inst}.100ms", "trades.#{inst}.raw"]
+    end)
+    
+    {:ok, _} = DeribitAdapter.subscribe(adapter, channels)
+    
+    state = %__MODULE__{
+      adapter: adapter,
+      buffer: %{orderbook: [], trades: []},
+      instruments: instruments,
+      batch_size: opts[:batch_size] || 1000,
+      flush_interval: opts[:flush_interval] || 100,
+      timer: schedule_flush(opts[:flush_interval] || 100)
+    }
+    
+    {:ok, state}
+  end
+
+  # Handle incoming market data
+  def handle_info({:websocket_message, %{"params" => %{"channel" => channel, "data" => data}}}, state) do
+    # Route to appropriate buffer
+    state = 
+      cond do
+        String.contains?(channel, "book.") ->
+          %{state | buffer: Map.update!(state.buffer, :orderbook, &[{channel, data} | &1])}
+        
+        String.contains?(channel, "trades.") ->
+          %{state | buffer: Map.update!(state.buffer, :trades, &[{channel, data} | &1])}
+        
+        true ->
+          state
+      end
+    
+    # Check if we should flush early due to buffer size
+    if total_buffer_size(state.buffer) >= state.batch_size do
+      send(self(), :flush_buffer)
+    end
+    
+    {:noreply, state}
+  end
+
+  # Periodic flush
+  def handle_info(:flush_buffer, state) do
+    if not empty_buffer?(state.buffer) do
+      # Process orderbook updates
+      if state.buffer.orderbook != [] do
+        process_orderbook_batch(Enum.reverse(state.buffer.orderbook))
+      end
+      
+      # Process trades
+      if state.buffer.trades != [] do
+        process_trades_batch(Enum.reverse(state.buffer.trades))
+      end
+    end
+    
+    # Reset buffer and schedule next flush
+    {:noreply, %{state | 
+      buffer: %{orderbook: [], trades: []},
+      timer: schedule_flush(state.flush_interval)
     }}
   end
 
-  def handle_info({:websocket_message, message}, state) do
-    # Buffer messages for batch processing
-    {:noreply, %{state | buffer: [message | state.buffer]}}
-  end
-
-  def handle_info(:flush_buffer, state) do
-    if state.buffer != [] do
-      # Process all buffered messages at once
-      process_batch(Enum.reverse(state.buffer))
-    end
-    
-    {:noreply, %{state | buffer: [], timer: schedule_flush()}}
-  end
-
-  defp schedule_flush do
-    Process.send_after(self(), :flush_buffer, 100) # Flush every 100ms
-  end
-
-  defp process_batch(messages) do
-    # Efficient batch processing
-    Enum.group_by(messages, & &1["type"])
-    |> Enum.each(fn {type, msgs} ->
-      process_message_type(type, msgs)
+  # Batch processing functions
+  defp process_orderbook_batch(updates) do
+    # Group by instrument for efficient processing
+    updates
+    |> Enum.group_by(fn {channel, _} -> extract_instrument(channel) end)
+    |> Enum.each(fn {instrument, book_updates} ->
+      # Merge orderbook updates efficiently
+      merged_book = merge_orderbook_updates(book_updates)
+      
+      # Store or forward to trading strategy
+      :telemetry.execute(
+        [:deribit, :orderbook, :batch_processed],
+        %{count: length(book_updates), instrument: instrument},
+        %{book_depth: calculate_depth(merged_book)}
+      )
     end)
+  end
+  
+  defp process_trades_batch(trades) do
+    # Calculate VWAP and volume metrics per instrument
+    trades
+    |> Enum.group_by(fn {channel, _} -> extract_instrument(channel) end)
+    |> Enum.each(fn {instrument, trade_list} ->
+      stats = calculate_trade_statistics(trade_list)
+      
+      :telemetry.execute(
+        [:deribit, :trades, :batch_processed],
+        Map.merge(stats, %{count: length(trade_list), instrument: instrument}),
+        %{}
+      )
+    end)
+  end
+  
+  # Helper functions
+  defp schedule_flush(interval) do
+    Process.send_after(self(), :flush_buffer, interval)
+  end
+  
+  defp total_buffer_size(buffer) do
+    length(buffer.orderbook) + length(buffer.trades)
+  end
+  
+  defp empty_buffer?(buffer) do
+    buffer.orderbook == [] and buffer.trades == []
+  end
+  
+  defp extract_instrument(channel) do
+    channel |> String.split(".") |> Enum.at(1)
+  end
+  
+  defp merge_orderbook_updates(updates) do
+    # Implement efficient orderbook merging logic
+    # This is a simplified version
+    List.last(updates)
+  end
+  
+  defp calculate_depth(book) do
+    # Calculate book depth metrics
+    %{
+      bid_depth: length(book["bids"] || []),
+      ask_depth: length(book["asks"] || [])
+    }
+  end
+  
+  defp calculate_trade_statistics(trades) do
+    # Calculate VWAP and volume
+    {total_volume, total_value} = 
+      Enum.reduce(trades, {0, 0}, fn {_, data}, {vol, val} ->
+        trade_vol = data["amount"] || 0
+        trade_price = data["price"] || 0
+        {vol + trade_vol, val + (trade_vol * trade_price)}
+      end)
+    
+    vwap = if total_volume > 0, do: total_value / total_volume, else: 0
+    
+    %{
+      volume: total_volume,
+      vwap: vwap,
+      trade_count: length(trades)
+    }
   end
 end
 ```
 
 ## Monitoring and Telemetry
 
-### Adding Custom Telemetry
+### Deribit Adapter with Telemetry
 
 ```elixir
-defmodule TelemetryClient do
-  def connect_with_telemetry(url) do
+defmodule DeribitTelemetryAdapter do
+  @moduledoc """
+  Wraps DeribitAdapter with comprehensive telemetry for monitoring.
+  """
+  
+  alias WebsockexAdapter.Examples.DeribitAdapter
+  require Logger
+
+  # Connection metrics
+  def connect_with_telemetry(opts) do
     start_time = System.monotonic_time()
     
-    result = WebsockexAdapter.Client.connect(url)
+    result = DeribitAdapter.connect(opts)
     
     duration = System.monotonic_time() - start_time
     
     :telemetry.execute(
-      [:my_app, :websocket, :connect],
+      [:deribit, :connection, :attempt],
       %{duration: duration},
-      %{url: url, status: elem(result, 0)}
+      %{url: opts[:url] || "wss://test.deribit.com/ws/api/v2", status: elem(result, 0)}
+    )
+    
+    case result do
+      {:ok, adapter} ->
+        # Start monitoring connection health
+        spawn_link(fn -> monitor_connection_health(adapter) end)
+        {:ok, adapter}
+      
+      error ->
+        error
+    end
+  end
+  
+  # Request/Response metrics
+  def send_request_with_telemetry(adapter, method, params \ %{}) do
+    start_time = System.monotonic_time()
+    
+    result = DeribitAdapter.send_request(adapter, method, params)
+    
+    duration = System.monotonic_time() - start_time
+    
+    :telemetry.execute(
+      [:deribit, :request, :complete],
+      %{duration: duration},
+      %{method: method, status: elem(result, 0)}
     )
     
     result
   end
   
-  def setup_telemetry_handler do
-    :telemetry.attach(
-      "websocket-metrics",
-      [:my_app, :websocket, :connect],
-      &handle_event/4,
+  # Subscription metrics
+  def subscribe_with_telemetry(adapter, channels) do
+    start_time = System.monotonic_time()
+    
+    result = DeribitAdapter.subscribe(adapter, channels)
+    
+    duration = System.monotonic_time() - start_time
+    
+    :telemetry.execute(
+      [:deribit, :subscription, :attempt],
+      %{duration: duration, channel_count: length(channels)},
+      %{channels: channels, status: elem(result, 0)}
+    )
+    
+    result
+  end
+  
+  # Setup telemetry handlers
+  def setup_telemetry_handlers do
+    events = [
+      [:deribit, :connection, :attempt],
+      [:deribit, :request, :complete],
+      [:deribit, :subscription, :attempt],
+      [:deribit, :orderbook, :batch_processed],
+      [:deribit, :trades, :batch_processed],
+      [:deribit, :connection, :health]
+    ]
+    
+    :telemetry.attach_many(
+      "deribit-metrics",
+      events,
+      &handle_telemetry_event/4,
       nil
     )
   end
   
-  defp handle_event(_event_name, measurements, metadata, _config) do
-    IO.puts("WebSocket connection took #{measurements.duration / 1_000_000}ms to #{metadata.url}")
+  defp handle_telemetry_event([:deribit, :connection, :attempt], measurements, metadata, _) do
+    Logger.info("Deribit connection #{metadata.status} in #{measurements.duration / 1_000_000}ms to #{metadata.url}")
+  end
+  
+  defp handle_telemetry_event([:deribit, :request, :complete], measurements, metadata, _) do
+    if measurements.duration > 100_000_000 do  # Log slow requests (>100ms)
+      Logger.warning("Slow Deribit request #{metadata.method} took #{measurements.duration / 1_000_000}ms")
+    end
+  end
+  
+  defp handle_telemetry_event([:deribit, :orderbook, :batch_processed], measurements, metadata, _) do
+    Logger.debug("Processed #{measurements.count} orderbook updates for #{measurements.instrument}")
+  end
+  
+  defp handle_telemetry_event([:deribit, :trades, :batch_processed], measurements, metadata, _) do
+    Logger.info("#{measurements.instrument}: #{measurements.trade_count} trades, " <>
+                "volume: #{measurements.volume}, VWAP: #{Float.round(measurements.vwap, 2)}")
+  end
+  
+  defp handle_telemetry_event([:deribit, :connection, :health], measurements, _metadata, _) do
+    if measurements.latency > 1000 do
+      Logger.warning("High Deribit connection latency: #{measurements.latency}ms")
+    end
+  end
+  
+  # Connection health monitoring
+  defp monitor_connection_health(adapter) do
+    Process.sleep(30_000)  # Check every 30 seconds
+    
+    case DeribitAdapter.test_request(adapter) do
+      {:ok, %{"result" => _}} ->
+        :telemetry.execute(
+          [:deribit, :connection, :health],
+          %{latency: 50, status: :healthy},  # You'd measure actual latency
+          %{}
+        )
+        
+      {:error, reason} ->
+        Logger.error("Deribit health check failed: #{inspect(reason)}")
+        :telemetry.execute(
+          [:deribit, :connection, :health],
+          %{latency: 0, status: :unhealthy},
+          %{error: reason}
+        )
+    end
+    
+    monitor_connection_health(adapter)
+  end
+end
+
+# Usage example
+defmodule MyApp.Application do
+  def start(_type, _args) do
+    # Setup telemetry handlers
+    DeribitTelemetryAdapter.setup_telemetry_handlers()
+    
+    # Connect with telemetry
+    {:ok, adapter} = DeribitTelemetryAdapter.connect_with_telemetry(
+      client_id: System.get_env("DERIBIT_CLIENT_ID"),
+      client_secret: System.get_env("DERIBIT_CLIENT_SECRET")
+    )
+    
+    # Use the adapter with automatic telemetry
+    {:ok, _} = DeribitTelemetryAdapter.subscribe_with_telemetry(adapter, [
+      "book.BTC-PERPETUAL.raw",
+      "trades.ETH-PERPETUAL.raw"
+    ])
+    
+    # Start your application
+    children = [
+      {DeribitMarketDataHandler, 
+        name: MyApp.MarketData,
+        client_id: System.get_env("DERIBIT_CLIENT_ID"),
+        client_secret: System.get_env("DERIBIT_CLIENT_SECRET"),
+        instruments: ["BTC-PERPETUAL", "ETH-PERPETUAL"],
+        batch_size: 500,
+        flush_interval: 50
+      }
+    ]
+    
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 end
 ```
