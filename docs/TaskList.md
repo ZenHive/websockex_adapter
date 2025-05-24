@@ -40,7 +40,8 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 | WNX0027.5 | ├─ Implement BatchSubscriptionManager Example    | Planned     | High     |          |               |
 | WNX0027.6 | ├─ Implement PositionTracker Example            | Planned     | Critical |          |               |
 | WNX0027.7 | ├─ Implement OptionsGreeksMonitor Example       | Planned     | High     |          |               |
-| WNX0027.8 | └─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
+| WNX0027.8 | ├─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
+| WNX0027.9 | └─ Implement DeltaNeutralHedger Example         | Planned     | Critical |          |               |
 
 ## Implementation Order
 1. **WNX0026**: Prepare for Hex.pm Publishing - Essential for package distribution
@@ -63,6 +64,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 - WNX0027.6: Implement PositionTracker Example
 - WNX0027.7: Implement OptionsGreeksMonitor Example
 - WNX0027.8: Implement MarketMakerQuoter Example
+- WNX0027.9: Implement DeltaNeutralHedger Example
 
 ---
 
@@ -372,15 +374,77 @@ PositionTracker.subscribe_updates(tracker, self())
 
 ---
 
+### WNX0027.9: Implement DeltaNeutralHedger Example
+**Description**: Automated delta-neutral hedging for maintaining dollar-neutral positions across multiple assets (e.g., ETH/BTC pairs, perpetual/spot arbitrage).
+
+**Simplicity Principle**: Show core hedging logic without complex portfolio optimization or multi-leg strategies.
+
+**Requirements**:
+- Create `lib/websockex_adapter/examples/delta_neutral_hedger.ex`
+- Monitor positions across multiple instruments
+- Calculate dollar exposures using real-time prices
+- Execute hedge trades to maintain neutrality
+- Support configurable rebalance thresholds
+
+**Key Features**:
+```elixir
+# Start hedger for ETH/BTC pair trading
+{:ok, hedger} = DeltaNeutralHedger.start_link(
+  adapter: deribit_adapter,
+  config: %{
+    pairs: [
+      %{long: "ETH-PERPETUAL", short: "BTC-PERPETUAL", ratio: :dynamic},
+      %{long: "ETH-28JUN24", short: "ETH-PERPETUAL", ratio: 1.0}
+    ],
+    rebalance_threshold: 100,  # $100 imbalance triggers rebalance
+    max_order_size: 10000      # $10k max per order
+  }
+)
+
+# Monitor current exposures
+{:ok, exposures} = DeltaNeutralHedger.get_exposures(hedger)
+# => %{
+#   total_delta: -45.20,  # $45.20 net short
+#   positions: [
+#     %{instrument: "ETH-PERPETUAL", delta: 5000, price: 3200},
+#     %{instrument: "BTC-PERPETUAL", delta: -5045.20, price: 65000}
+#   ],
+#   hedge_required: true
+# }
+
+# Execute rebalance
+{:ok, orders} = DeltaNeutralHedger.rebalance(hedger)
+# => [
+#   %{instrument: "BTC-PERPETUAL", side: "buy", size: 45.20, type: "market"}
+# ]
+
+# Set up automatic hedging
+:ok = DeltaNeutralHedger.enable_auto_hedge(hedger, interval: 5000)
+```
+
+**Test Scenarios**:
+- Test delta calculation across multiple instruments
+- Test rebalance threshold triggers
+- Test hedge order sizing and execution
+- Test handling of partial fills during rebalancing
+- Integration test with real positions and prices
+
+**Status**: Planned
+**Priority**: Critical
+**Estimated LOC**: ~180 lines
+
+---
+
 **Implementation Order**:
 1. **WNX0027.6** - PositionTracker (critical for all traders)
-2. **WNX0027.5** - BatchSubscriptionManager (critical for data feeds)
-3. **WNX0027.8** - MarketMakerQuoter (core market making)
-4. **WNX0027.7** - OptionsGreeksMonitor (options specific)
-5. **WNX0027.1** - RateLimitedClient (general purpose)
-6. **WNX0027.2** - MyTradingSystem (builds on basics)
-7. **WNX0027.3** - DeribitMarketDataHandler (performance optimization)
-8. **WNX0027.4** - DeribitTelemetryAdapter (monitoring enhancement)
+2. **WNX0027.9** - DeltaNeutralHedger (critical for delta-neutral strategies) 
+3. **WNX0027.5** - BatchSubscriptionManager (critical for data feeds)
+4. **WNX0027.8** - MarketMakerQuoter (core market making)
+5. **WNX0027.7** - OptionsGreeksMonitor (options specific)
+6. **WNX0027.1** - RateLimitedClient (general purpose)
+7. **WNX0027.2** - MyTradingSystem (builds on basics)
+8. **WNX0027.3** - DeribitMarketDataHandler (performance optimization)
+9. **WNX0027.4** - DeribitTelemetryAdapter (monitoring enhancement)
 
 ## Completed Tasks
 | ID      | Description                                      | Status    | Priority | Assignee | Review Rating | Archive Location |
