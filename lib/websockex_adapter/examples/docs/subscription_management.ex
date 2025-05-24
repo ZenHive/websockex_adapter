@@ -3,26 +3,27 @@ defmodule WebsockexAdapter.Examples.Docs.SubscriptionManagement do
   Examples of subscription management with WebSocket connections.
   """
 
-  require Logger
   alias WebsockexAdapter.Client
+
+  require Logger
 
   @doc """
   Subscribe to multiple data streams using echo server.
   """
   def multi_channel_subscription do
     {:ok, client} = Client.connect("wss://echo.websocket.org")
-    
+
     # Subscribe to multiple channels
     channels = ["trades.BTC-USD", "orderbook.ETH-USD", "ticker.SOL-USD"]
-    
+
     # Send subscription message (echo server will echo it back)
     subscription_message = %{
       "action" => "subscribe",
       "channels" => channels
     }
-    
+
     :ok = Client.send_message(client, Jason.encode!(subscription_message))
-    
+
     # Return client and channels for verification
     {:ok, client, channels}
   end
@@ -36,12 +37,14 @@ defmodule WebsockexAdapter.Examples.Docs.SubscriptionManagement do
         case Jason.decode(message) do
           {:ok, %{"channel" => channel, "data" => data}} ->
             {:market_update, channel, data}
+
           {:ok, decoded} ->
             {:message, decoded}
+
           {:error, _} ->
             {:text_message, message}
         end
-      
+
       {:websocket_closed, reason} ->
         {:closed, reason}
     after
@@ -56,12 +59,13 @@ defmodule WebsockexAdapter.Examples.Docs.SubscriptionManagement do
     # Subscribe to channels
     subscription = %{"action" => "subscribe", "channels" => channels}
     :ok = Client.send_message(client, Jason.encode!(subscription))
-    
+
     # Collect messages
     collect_messages(message_count, [])
   end
 
   defp collect_messages(0, acc), do: {:ok, Enum.reverse(acc)}
+
   defp collect_messages(count, acc) do
     receive do
       {:websocket_message, message} ->
