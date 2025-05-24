@@ -35,7 +35,37 @@ defmodule WebsockexAdapter.MixProject do
       homepage_url: "https://github.com/ZenHive/websockex_adapter",
       docs: [
         main: "WebsockexAdapter",
-        extras: ["README.md"],
+        extras: [
+          "README.md",
+          "CHANGELOG.md",
+          "docs/guides/building_adapters.md",
+          "docs/guides/troubleshooting_reconnection.md",
+          "docs/architecture/reconnection.md",
+          "docs/gun_integration.md",
+          "docs/stability_testing.md",
+          "docs/supervision_strategy.md"
+        ],
+        groups_for_extras: [
+          "Getting Started": ["README.md", "CHANGELOG.md"],
+          Guides: [
+            "docs/guides/building_adapters.md",
+            "docs/guides/troubleshooting_reconnection.md"
+          ],
+          Architecture: [
+            "docs/architecture/reconnection.md",
+            "docs/gun_integration.md",
+            "docs/supervision_strategy.md"
+          ],
+          "Deribit Integration": [
+            "docs/deribit/index.md",
+            "docs/deribit/overview.md",
+            "docs/deribit/authentication.md",
+            "docs/deribit/market_data.md",
+            "docs/deribit/trading.md",
+            "docs/deribit/subscriptions.md"
+          ],
+          Testing: ["docs/stability_testing.md"]
+        ],
         source_url: "https://github.com/ZenHive/websockex_adapter",
         source_ref: "v#{@version}"
       ]
@@ -49,28 +79,29 @@ defmodule WebsockexAdapter.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger, :crypto, :ssl]
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # Runtime dependencies
       {:gun, "~> 2.2"},
       {:jason, "~> 1.4"},
+      {:telemetry, "~> 1.3"},
+      {:certifi, "~> 2.5"},
 
+      # Development and test dependencies
       # Static code analysis
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 
       # Documentation
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
-
+      {:doctor, "~> 0.22.0", only: :dev},
       # Tasks
       {:task_validator, "~> 0.6.0", only: [:dev, :test], runtime: false},
-
-      # Mocks
-      # {:mox, "~> 1.0", only: :test},
 
       # Security scanning
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
@@ -92,15 +123,7 @@ defmodule WebsockexAdapter.MixProject do
       {:temp, "~> 0.4", only: :test},
 
       # For generating self-signed certificates in tests
-      {:x509, "~> 0.8", only: :test},
-      {:certifi, "~> 2.5"},
-      {:telemetry, "~> 1.3"},
-      # {:meck, "~> 0.9", only: :test},
-      {:rename, "~> 0.1.0", only: :dev}
-
-      # {:mint_web_socket, "~> 1.0"}
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      {:x509, "~> 0.8", only: :test}
     ]
   end
 
@@ -132,8 +155,9 @@ defmodule WebsockexAdapter.MixProject do
 
   defp description do
     """
-    A robust WebSocket client library based on Websockex, extended with Gun transport,
-    behavior-based architecture, automatic reconnection, and enterprise-grade features.
+    A robust WebSocket client library for Elixir, built on Gun transport for production-grade
+    reliability. Designed for financial APIs with automatic reconnection, comprehensive error
+    handling, and real-world testing.
     """
   end
 
