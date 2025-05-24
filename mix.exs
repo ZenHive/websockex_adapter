@@ -38,6 +38,8 @@ defmodule WebsockexAdapter.MixProject do
         extras: [
           "README.md",
           "CHANGELOG.md",
+          "docs/Architecture.md",
+          "docs/Examples.md",
           "docs/guides/building_adapters.md",
           "docs/guides/troubleshooting_reconnection.md",
           "docs/architecture/reconnection.md",
@@ -46,23 +48,16 @@ defmodule WebsockexAdapter.MixProject do
           "docs/supervision_strategy.md"
         ],
         groups_for_extras: [
-          "Getting Started": ["README.md", "CHANGELOG.md"],
+          "Getting Started": ["README.md", "CHANGELOG.md", "docs/Examples.md"],
           Guides: [
             "docs/guides/building_adapters.md",
             "docs/guides/troubleshooting_reconnection.md"
           ],
           Architecture: [
+            "docs/Architecture.md",
             "docs/architecture/reconnection.md",
             "docs/gun_integration.md",
             "docs/supervision_strategy.md"
-          ],
-          "Deribit Integration": [
-            "docs/deribit/index.md",
-            "docs/deribit/overview.md",
-            "docs/deribit/authentication.md",
-            "docs/deribit/market_data.md",
-            "docs/deribit/trading.md",
-            "docs/deribit/subscriptions.md"
           ],
           Testing: ["docs/stability_testing.md"]
         ],
