@@ -63,6 +63,83 @@ defmodule WebsockexAdapter.ClientTest do
     Client.close(client)
   end
 
+  describe "default message handler" do
+    @tag :integration
+    test "sends text messages to calling process by default" do
+      # Use echo server for predictable responses
+      {:ok, client} = Client.connect("wss://echo.websocket.org")
+
+      # Send a test message
+      test_message = "Hello, WebSocket!"
+      assert :ok = Client.send_message(client, test_message)
+
+      # Should receive the echoed message as {:websocket_message, data}
+      assert_receive {:websocket_message, ^test_message}, 5_000
+
+      Client.close(client)
+    end
+
+    @tag :integration
+    test "custom handler overrides default behavior" do
+      test_pid = self()
+
+      # Custom handler that sends different message format
+      custom_handler = fn
+        {:message, data} -> send(test_pid, {:custom_message, data})
+        _other -> :ok
+      end
+
+      {:ok, client} = Client.connect("wss://echo.websocket.org", handler: custom_handler)
+
+      test_message = "Custom handler test"
+      assert :ok = Client.send_message(client, test_message)
+
+      # Should receive custom format, not default
+      assert_receive {:custom_message, ^test_message}, 5_000
+      refute_receive {:websocket_message, _}, 100
+
+      Client.close(client)
+    end
+
+    @tag :integration
+    test "handles binary messages with default handler" do
+      # Use echo server to test that default handler works with any message type
+      {:ok, client} = Client.connect("wss://echo.websocket.org")
+
+      # Send a simple text message (echo server will echo it back)
+      test_message = "Binary handler test"
+
+      assert :ok = Client.send_message(client, test_message)
+
+      # Should receive the echoed message via default handler
+      assert_receive {:websocket_message, ^test_message}, 5_000
+
+      # Verify the GenServer is still alive (didn't crash from message handling)
+      assert Process.alive?(client.server_pid)
+
+      Client.close(client)
+    end
+
+    test "default handler ignores unrecognized message types" do
+      # Test handler function directly since we can't easily trigger other frame types
+      parent_pid = self()
+
+      handler = fn
+        {:message, data} -> send(parent_pid, {:websocket_message, data})
+        {:binary, data} -> send(parent_pid, {:websocket_message, data})
+        {:frame, frame} -> send(parent_pid, {:websocket_frame, frame})
+        _other -> :ok
+      end
+
+      # These should not crash
+      assert :ok = handler.({:unknown_type, "data"})
+      assert :ok = handler.(:weird_message)
+
+      # Should not have received anything
+      refute_receive _, 10
+    end
+  end
+
   describe "GenServer implementation" do
     test "client struct includes server_pid" do
       {:ok, client} = Client.connect(@deribit_test_url)

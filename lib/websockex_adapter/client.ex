@@ -167,7 +167,25 @@ defmodule WebsockexAdapter.Client do
   end
 
   def connect(%WebsockexAdapter.Config{} = config, opts) do
-    case GenServer.start(__MODULE__, {config, opts}) do
+    # Capture calling process PID for default handler
+    parent_pid = self()
+
+    # Create default handler that sends messages to parent process if none provided
+    opts_with_handler =
+      if Keyword.has_key?(opts, :handler) do
+        opts
+      else
+        default_handler = fn
+          {:message, data} -> send(parent_pid, {:websocket_message, data})
+          {:binary, data} -> send(parent_pid, {:websocket_message, data})
+          {:frame, frame} -> send(parent_pid, {:websocket_frame, frame})
+          _other -> :ok
+        end
+
+        Keyword.put(opts, :handler, default_handler)
+      end
+
+    case GenServer.start(__MODULE__, {config, opts_with_handler}) do
       {:ok, server_pid} ->
         # Add a bit more time for GenServer overhead
         timeout = max(config.timeout + 100, 1000)
@@ -556,8 +574,6 @@ defmodule WebsockexAdapter.Client do
     case WebsockexAdapter.MessageHandler.handle_message({:gun_ws, gun_pid, stream_ref, frame}, state.handler) do
       {:ok, {:message, decoded_frame}} ->
         # Data frame - route to subscriptions, heartbeat manager, etc.
-        # Also notify the handler about the frame
-        state.handler.(decoded_frame)
         new_state = route_data_frame(decoded_frame, state)
         {:noreply, new_state}
 
