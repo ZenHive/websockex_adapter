@@ -176,7 +176,9 @@ defmodule WebsockexAdapter.Client do
         opts
       else
         default_handler = fn
-          {:message, data} -> send(parent_pid, {:websocket_message, data})
+          {:message, {:text, data}} -> send(parent_pid, {:websocket_message, data})
+          {:message, {:binary, data}} -> send(parent_pid, {:websocket_message, data})
+          {:message, data} when is_binary(data) -> send(parent_pid, {:websocket_message, data})
           {:binary, data} -> send(parent_pid, {:websocket_message, data})
           {:frame, frame} -> send(parent_pid, {:websocket_frame, frame})
           _other -> :ok
