@@ -1,10 +1,13 @@
 defmodule WebsockexAdapter.Examples.RateLimitingTest do
   use ExUnit.Case, async: true
-  alias WebsockexAdapter.{Client, RateLimiter}
+
+  alias WebsockexAdapter.Client
+  alias WebsockexAdapter.RateLimiter
 
   describe "rate limiting configuration" do
     test "creates rate limiter with token bucket configuration" do
       name = :test_limiter_1
+
       config = %{
         tokens: 10,
         refill_rate: 10,
@@ -18,6 +21,7 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
 
     test "supports burst capacity" do
       name = :test_limiter_burst
+
       config = %{
         tokens: 20,
         refill_rate: 10,
@@ -26,7 +30,7 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
       }
 
       {:ok, ^name} = RateLimiter.init(name, config)
-      
+
       # Can burst up to 20 requests
       for _ <- 1..20 do
         assert :ok = RateLimiter.consume(name, %{})
@@ -41,13 +45,14 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
     @describetag :integration
     test "enforces rate limits on WebSocket messages" do
       limiter_name = :test_client_limiter
+
       config = %{
         tokens: 5,
         refill_rate: 5,
         refill_interval: 100,
         request_cost: &RateLimiter.simple_cost/1
       }
-      
+
       {:ok, ^limiter_name} = RateLimiter.init(limiter_name, config)
       {:ok, client} = Client.connect("wss://echo.websocket.org")
 
@@ -76,13 +81,14 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
     test "handles different cost functions for API compliance" do
       # Deribit-style credit system
       deribit_limiter = :test_deribit_limiter
+
       deribit_config = %{
         tokens: 100,
         refill_rate: 20,
         refill_interval: 100,
         request_cost: &RateLimiter.deribit_cost/1
       }
-      
+
       {:ok, ^deribit_limiter} = RateLimiter.init(deribit_limiter, deribit_config)
 
       # Public method costs 1 credit
@@ -102,13 +108,14 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
   describe "queue management" do
     test "queues requests when rate limited" do
       queue_limiter = :test_queue_limiter
+
       config = %{
         tokens: 2,
         refill_rate: 2,
         refill_interval: 100,
         request_cost: &RateLimiter.simple_cost/1
       }
-      
+
       {:ok, ^queue_limiter} = RateLimiter.init(queue_limiter, config)
 
       # Consume all tokens
@@ -125,13 +132,14 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
 
     test "prevents queue overflow" do
       overflow_limiter = :test_overflow_limiter
+
       config = %{
         tokens: 1,
         refill_rate: 1,
         refill_interval: 1000,
         request_cost: &RateLimiter.simple_cost/1
       }
-      
+
       {:ok, ^overflow_limiter} = RateLimiter.init(overflow_limiter, config)
 
       # Consume token
@@ -151,6 +159,7 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
     @describetag :integration
     test "handles high-frequency trading with rate limits" do
       trading_limiter = :test_trading_limiter
+
       config = %{
         tokens: 50,
         refill_rate: 50,
@@ -162,33 +171,40 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
           _ -> 1
         end
       }
-      
+
       {:ok, ^trading_limiter} = RateLimiter.init(trading_limiter, config)
       {:ok, client} = Client.connect("wss://echo.websocket.org")
 
       # Simulate trading session
-      _results = Enum.reduce(1..5, [], fn i, acc ->
-        order = %{"type" => "order", "id" => i, "action" => "buy"}
-        case RateLimiter.consume(trading_limiter, order) do
-          :ok ->
-            case Client.send_message(client, Jason.encode!(order)) do
-              :ok -> acc ++ [{:sent, i}]
-              {:ok, _} -> acc ++ [{:sent, i}]  # echo response
-            end
-          {:error, reason} ->
-            acc ++ [{:limited, i, reason}]
-        end
-      end)
+      _results =
+        Enum.reduce(1..5, [], fn i, acc ->
+          order = %{"type" => "order", "id" => i, "action" => "buy"}
+
+          case RateLimiter.consume(trading_limiter, order) do
+            :ok ->
+              case Client.send_message(client, Jason.encode!(order)) do
+                :ok -> acc ++ [{:sent, i}]
+                # echo response
+                {:ok, _} -> acc ++ [{:sent, i}]
+              end
+
+            {:error, reason} ->
+              acc ++ [{:limited, i, reason}]
+          end
+        end)
 
       # Query positions
       for i <- 1..10 do
         query = %{"type" => "query", "id" => i}
+
         case RateLimiter.consume(trading_limiter, query) do
           :ok ->
             case Client.send_message(client, Jason.encode!(query)) do
               :ok -> :ok
-              {:ok, _} -> :ok  # echo response
+              # echo response
+              {:ok, _} -> :ok
             end
+
           _ ->
             :ok
         end
@@ -205,13 +221,15 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
     test "implements exchange-specific rate limiting" do
       # Test with Binance-style weight system
       binance_limiter = :test_binance_limiter
+
       binance_config = %{
-        tokens: 1200,  # Binance 1200 weight limit per minute
+        # Binance 1200 weight limit per minute
+        tokens: 1200,
         refill_rate: 1200,
         refill_interval: 60_000,
         request_cost: &RateLimiter.binance_cost/1
       }
-      
+
       {:ok, ^binance_limiter} = RateLimiter.init(binance_limiter, binance_config)
 
       # Different endpoints have different weights
@@ -227,21 +245,24 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
     @describetag :integration
     test "respects Deribit credit limits" do
       deribit_limiter = :test_deribit_real_limiter
+
       deribit_config = %{
-        tokens: 200,  # Deribit credit limit
-        refill_rate: 40,  # 40 credits per second
+        # Deribit credit limit
+        tokens: 200,
+        # 40 credits per second
+        refill_rate: 40,
         refill_interval: 1000,
         request_cost: &RateLimiter.deribit_cost/1
       }
-      
+
       {:ok, ^deribit_limiter} = RateLimiter.init(deribit_limiter, deribit_config)
-      
+
       client_id = System.get_env("DERIBIT_CLIENT_ID")
       client_secret = System.get_env("DERIBIT_CLIENT_SECRET")
-      
+
       if client_id && client_secret do
         {:ok, client} = Client.connect("wss://test.deribit.com/ws/api/v2")
-        
+
         # Auth request
         auth_msg = %{
           "jsonrpc" => "2.0",
@@ -253,18 +274,20 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
           },
           "id" => 1
         }
-        
+
         # Check rate limit before sending
         assert :ok = RateLimiter.consume(deribit_limiter, auth_msg)
+
         case Client.send_message(client, Jason.encode!(auth_msg)) do
           :ok -> :ok
-          {:ok, _} -> :ok  # JSON-RPC response
+          # JSON-RPC response
+          {:ok, _} -> :ok
           error -> flunk("Unexpected error: #{inspect(error)}")
         end
-        
+
         # Wait for auth response
         assert_receive {:websocket_message, _}, 5_000
-        
+
         # Multiple ticker requests
         for i <- 1..5 do
           ticker_msg = %{
@@ -273,20 +296,22 @@ defmodule WebsockexAdapter.Examples.RateLimitingTest do
             "params" => %{"instrument_name" => "BTC-PERPETUAL"},
             "id" => i + 1
           }
-          
+
           case RateLimiter.consume(deribit_limiter, ticker_msg) do
             :ok ->
               case Client.send_message(client, Jason.encode!(ticker_msg)) do
                 :ok -> :ok
-                {:ok, _} -> :ok  # JSON-RPC response
+                # JSON-RPC response
+                {:ok, _} -> :ok
                 error -> flunk("Unexpected error: #{inspect(error)}")
               end
+
             {:error, :rate_limited} ->
               # Expected when we hit limits
               :ok
           end
         end
-        
+
         :ok = Client.close(client)
       end
     end
