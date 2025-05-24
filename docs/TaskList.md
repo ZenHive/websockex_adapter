@@ -33,15 +33,15 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 | --------- | ------------------------------------------------ | ----------- | -------- | -------- | ------------- |
 | WNX0026   | Prepare for Hex.pm Publishing                    | Planned     | High     |          |               |
 | WNX0027   | Ensure All Examples Have Working Implementations | In Progress | High     |          |               |
-| WNX0027.1 | ├─ Implement RateLimitedClient Example          | Planned     | High     |          |               |
-| WNX0027.2 | ├─ Implement MyTradingSystem Example            | Planned     | Medium   |          |               |
-| WNX0027.3 | ├─ Implement DeribitMarketDataHandler Example   | Planned     | Medium   |          |               |
-| WNX0027.4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned     | Low      |          |               |
-| WNX0027.5 | ├─ Implement BatchSubscriptionManager Example    | Planned     | High     |          |               |
-| WNX0027.6 | ├─ Implement PositionTracker Example            | Planned     | Critical |          |               |
-| WNX0027.7 | ├─ Implement OptionsGreeksMonitor Example       | Planned     | High     |          |               |
-| WNX0027.8 | ├─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
-| WNX0027.9 | └─ Implement DeltaNeutralHedger Example         | Planned     | Critical |          |               |
+| WNX0027-1 | ├─ Implement RateLimitedClient Example          | Planned     | High     |          |               |
+| WNX0027-2 | ├─ Implement MyTradingSystem Example            | Planned     | Medium   |          |               |
+| WNX0027-3 | ├─ Implement DeribitMarketDataHandler Example   | Planned     | Medium   |          |               |
+| WNX0027-4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned     | Low      |          |               |
+| WNX0027-5 | ├─ Implement BatchSubscriptionManager Example    | Planned     | High     |          |               |
+| WNX0027-6 | ├─ Implement PositionTracker Example            | In Progress | Critical |          |               |
+| WNX0027-7 | ├─ Implement OptionsGreeksMonitor Example       | Planned     | High     |          |               |
+| WNX0027-8 | ├─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
+| WNX0027-9 | └─ Implement DeltaNeutralHedger Example         | Planned     | Critical |          |               |
 
 ## Implementation Order
 1. **WNX0026**: Prepare for Hex.pm Publishing - Essential for package distribution
@@ -52,23 +52,133 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 ### WNX0027: Ensure All Examples Have Working Implementations (Parent Task)
 **Description**: Every code example shown in docs/Examples.md must have a corresponding working implementation module and comprehensive tests to ensure documentation accuracy and prevent drift.
 
+**Simplicity Progression Plan**:
+1. Audit docs/Examples.md to identify all code examples
+2. Create implementation modules for each example
+3. Write comprehensive tests for each implementation
+4. Update documentation references to point to real implementations
+
+**Simplicity Principle**:
+Each example demonstrates one specific feature with minimal code complexity, following existing patterns from deribit_adapter.ex.
+
+**Abstraction Evaluation**:
+- **Challenge**: Should examples be abstract or concrete implementations?
+- **Minimal Solution**: Concrete, working examples that users can copy and run immediately
+- **Justification**:
+  1. Real code prevents documentation drift
+  2. Users can test examples directly
+  3. Examples serve as integration tests
+
+**Requirements**:
+- Every example in docs/Examples.md has implementation file
+- All implementations follow 5-function limit
+- Each example focuses on one specific feature
+- All examples tested against real test.deribit.com API
+
+**ExUnit Test Requirements**:
+- Unit tests for each example's public functions
+- Integration tests using real API connections
+- Error scenario testing
+- Performance benchmarks where relevant
+
+**Integration Test Scenarios**:
+- Real API connection and authentication
+- Message sending and response handling
+- Error recovery and reconnection
+- Subscription management
+
+**Typespec Requirements**:
+- Full @spec annotations for all public functions
+- Custom types for domain concepts
+- Dialyzer-clean implementations
+
+**TypeSpec Documentation**:
+- Clear type definitions with examples
+- Document expected input/output formats
+- Include error type specifications
+
+**TypeSpec Verification**:
+- Run mix dialyzer on all examples
+- Verify type correctness with property tests
+- Document any type limitations
+
+**Error Handling**
+**Core Principles**
+- Pass raw errors
+- Use {:ok, result} | {:error, reason}
+- Let it crash
+**Error Implementation**
+- No wrapping
+- Minimal rescue
+- function/1 & /! versions
+**Error Examples**
+- Raw error passthrough
+- Simple rescue case
+- Supervisor handling
+**GenServer Specifics**
+- Handle_call/3 error pattern
+- Terminate/2 proper usage
+- Process linking considerations
+
+**Code Quality KPIs**
+- Lines of code: ~1130 total across 9 examples
+- Functions per module: 5 maximum
+- Lines per function: 15 maximum
+- Call depth: 2 maximum
+- Cyclomatic complexity: Low (simple conditional logic only)
+- Test coverage: 90%+ with real API testing
+
+**Dependencies**
+- websockex_adapter: Core library functionality
+- jason: JSON encoding/decoding
+- telemetry: Metrics reporting (for telemetry example)
+
+**Architecture Notes**
+- Examples build on proven patterns from deribit_adapter.ex
+- Each example is standalone and copyable
+- Focus on production-ready patterns
+- Demonstrate integration with WebsockexAdapter ecosystem
+
 **Status**: In Progress
 **Priority**: High
 
+**Implementation Notes**:
+- Parent task for ensuring documentation accuracy
+- Sub-tasks implement individual examples
+- Priority order based on trader needs
+
+**Complexity Assessment**:
+- Previous: Documentation with imaginary examples
+- Current: Real, tested implementations
+- Added Complexity: Minimal - examples are simple by design
+- Justification: Prevents documentation drift, provides working code
+
+**Maintenance Impact**:
+- Examples serve as regression tests
+- Documentation updates require code updates
+- Clear separation of concerns per example
+- Easy to add new examples following pattern
+
+**Error Handling Implementation**:
+- Network errors: Rely on client reconnection
+- API errors: Pass through with context
+- Rate limit errors: Demonstrate backoff patterns
+- Invalid message errors: Show validation approaches
+
 **Sub-tasks**:
-- WNX0027.1: Implement RateLimitedClient Example
-- WNX0027.2: Implement MyTradingSystem Example  
-- WNX0027.3: Implement DeribitMarketDataHandler Example
-- WNX0027.4: Implement DeribitTelemetryAdapter Example
-- WNX0027.5: Implement BatchSubscriptionManager Example
-- WNX0027.6: Implement PositionTracker Example
-- WNX0027.7: Implement OptionsGreeksMonitor Example
-- WNX0027.8: Implement MarketMakerQuoter Example
-- WNX0027.9: Implement DeltaNeutralHedger Example
+- WNX0027-1: Implement RateLimitedClient Example
+- WNX0027-2: Implement MyTradingSystem Example  
+- WNX0027-3: Implement DeribitMarketDataHandler Example
+- WNX0027-4: Implement DeribitTelemetryAdapter Example
+- WNX0027-5: Implement BatchSubscriptionManager Example
+- WNX0027-6: Implement PositionTracker Example
+- WNX0027-7: Implement OptionsGreeksMonitor Example
+- WNX0027-8: Implement MarketMakerQuoter Example
+- WNX0027-9: Implement DeltaNeutralHedger Example
 
 ---
 
-### WNX0027.1: Implement RateLimitedClient Example
+### WNX0027-1: Implement RateLimitedClient Example
 **Description**: Create working implementation and tests for the RateLimitedClient example shown in docs/Examples.md (line 154).
 
 **Simplicity Principle**: Minimal wrapper showing how to integrate rate limiting with WebSocket operations.
@@ -91,7 +201,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 
 ---
 
-### WNX0027.2: Implement MyTradingSystem Example
+### WNX0027-2: Implement MyTradingSystem Example
 **Description**: Create working implementation for the MyTradingSystem advanced Deribit features example (line 273).
 
 **Simplicity Principle**: Show advanced Deribit features without creating a full trading system.
@@ -114,7 +224,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 
 ---
 
-### WNX0027.3: Implement DeribitMarketDataHandler Example
+### WNX0027-3: Implement DeribitMarketDataHandler Example
 **Description**: Create the high-frequency market data handler GenServer example (line 351).
 
 **Simplicity Principle**: Focus on buffering and batch processing patterns, not full trading logic.
@@ -139,7 +249,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 
 ---
 
-### WNX0027.4: Implement DeribitTelemetryAdapter Example
+### WNX0027-4: Implement DeribitTelemetryAdapter Example
 **Description**: Create telemetry wrapper showing monitoring best practices (line 524).
 
 **Simplicity Principle**: Thin wrapper adding telemetry to existing adapter functions.
@@ -166,7 +276,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 
 ---
 
-### WNX0027.5: Implement BatchSubscriptionManager Example
+### WNX0027-5: Implement BatchSubscriptionManager Example
 **Description**: Create example showing how to batch subscriptions to avoid overwhelming Deribit's API with too many simultaneous subscription requests.
 
 **Simplicity Principle**: Simple GenServer that queues and batches subscription requests with configurable batch size and delay.
@@ -218,7 +328,7 @@ channels = for i <- 1..50, do: "book.BTC-#{i}JUN25.raw"
 
 ---
 
-### WNX0027.6: Implement PositionTracker Example
+### WNX0027-6: Implement PositionTracker Example
 **Description**: Real-time position tracking across multiple instruments with P&L, margin monitoring, and liquidation alerts - critical for all trading strategies.
 
 **Simplicity Principle**: GenServer that maintains position state from trades and provides risk metrics without complex portfolio theory.
@@ -266,7 +376,7 @@ PositionTracker.subscribe_updates(tracker, self())
 
 ---
 
-### WNX0027.7: Implement OptionsGreeksMonitor Example
+### WNX0027-7: Implement OptionsGreeksMonitor Example
 **Description**: Monitor option Greeks (delta, gamma, vega, theta) for options portfolios - essential for options market makers and volatility traders.
 
 **Simplicity Principle**: Focused on Greeks monitoring and aggregation, not complex pricing models.
@@ -319,7 +429,7 @@ PositionTracker.subscribe_updates(tracker, self())
 
 ---
 
-### WNX0027.8: Implement MarketMakerQuoter Example
+### WNX0027-8: Implement MarketMakerQuoter Example
 **Description**: Automated quote management for market makers with spread calculation, inventory management, and dynamic pricing.
 
 **Simplicity Principle**: Show core market making logic without complex pricing models or strategies.
@@ -374,7 +484,7 @@ PositionTracker.subscribe_updates(tracker, self())
 
 ---
 
-### WNX0027.9: Implement DeltaNeutralHedger Example
+### WNX0027-9: Implement DeltaNeutralHedger Example
 **Description**: Automated delta-neutral hedging for maintaining dollar-neutral positions across multiple assets (e.g., ETH/BTC pairs, perpetual/spot arbitrage).
 
 **Simplicity Principle**: Show core hedging logic without complex portfolio optimization or multi-leg strategies.
@@ -436,15 +546,15 @@ PositionTracker.subscribe_updates(tracker, self())
 ---
 
 **Implementation Order**:
-1. **WNX0027.6** - PositionTracker (critical for all traders)
-2. **WNX0027.9** - DeltaNeutralHedger (critical for delta-neutral strategies) 
-3. **WNX0027.5** - BatchSubscriptionManager (critical for data feeds)
-4. **WNX0027.8** - MarketMakerQuoter (core market making)
-5. **WNX0027.7** - OptionsGreeksMonitor (options specific)
-6. **WNX0027.1** - RateLimitedClient (general purpose)
-7. **WNX0027.2** - MyTradingSystem (builds on basics)
-8. **WNX0027.3** - DeribitMarketDataHandler (performance optimization)
-9. **WNX0027.4** - DeribitTelemetryAdapter (monitoring enhancement)
+1. **WNX0027-6** - PositionTracker (critical for all traders)
+2. **WNX0027-9** - DeltaNeutralHedger (critical for delta-neutral strategies) 
+3. **WNX0027-5** - BatchSubscriptionManager (critical for data feeds)
+4. **WNX0027-8** - MarketMakerQuoter (core market making)
+5. **WNX0027-7** - OptionsGreeksMonitor (options specific)
+6. **WNX0027-1** - RateLimitedClient (general purpose)
+7. **WNX0027-2** - MyTradingSystem (builds on basics)
+8. **WNX0027-3** - DeribitMarketDataHandler (performance optimization)
+9. **WNX0027-4** - DeribitTelemetryAdapter (monitoring enhancement)
 
 ## Completed Tasks
 | ID      | Description                                      | Status    | Priority | Assignee | Review Rating | Archive Location |
