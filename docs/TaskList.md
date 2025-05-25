@@ -12,7 +12,7 @@
 | WNX0027-3 | ├─ Implement DeribitMarketDataHandler Example   | Planned     | Medium   |          |               |
 | WNX0027-4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned     | Low      |          |               |
 | WNX0027-5 | ├─ Implement BatchSubscriptionManager Example    | Planned     | High     |          |               |
-| WNX0027-6 | ├─ Implement PositionTracker Example            | Planned     | Critical |          |               |
+| WNX0027-6 | ├─ Implement PositionTracker Example            | Completed   | Critical |          | ⭐⭐⭐⭐⭐    |
 | WNX0027-7 | ├─ Implement OptionsGreeksMonitor Example       | Planned     | High     |          |               |
 | WNX0027-8 | ├─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
 | WNX0027-9 | └─ Implement DeltaNeutralHedger Example         | Planned     | Critical |          |               |

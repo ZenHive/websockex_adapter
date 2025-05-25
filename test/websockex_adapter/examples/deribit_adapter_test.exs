@@ -201,4 +201,85 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
       Logger.debug("Set DERIBIT_CLIENT_ID and DERIBIT_CLIENT_SECRET environment variables to run this test")
     end
   end
+
+  describe "DeribitAdapter.send_request/3" do
+    test "sends generic request to public endpoint" do
+      {:ok, adapter} = DeribitAdapter.connect()
+
+      # Test with a public endpoint that doesn't require auth
+      assert {:ok, response} = DeribitAdapter.send_request(adapter, "public/test", %{})
+      assert response["result"]["version"]
+      assert is_binary(response["result"]["version"])
+
+      # Clean up
+      DeribitAdapter.close(adapter)
+    end
+
+    test "sends request with parameters" do
+      {:ok, adapter} = DeribitAdapter.connect()
+
+      # Get instruments for BTC
+      assert {:ok, response} = DeribitAdapter.send_request(adapter, "public/get_instruments", %{
+        currency: "BTC",
+        kind: "future"
+      })
+      
+      assert response["result"]
+      assert is_list(response["result"])
+
+      # Clean up
+      DeribitAdapter.close(adapter)
+    end
+
+    @tag :skip_unless_env
+    test "sends authenticated request" do
+      client_id = System.get_env("DERIBIT_CLIENT_ID")
+      client_secret = System.get_env("DERIBIT_CLIENT_SECRET")
+
+      if client_id && client_secret do
+        {:ok, adapter} = DeribitAdapter.connect(
+          client_id: client_id,
+          client_secret: client_secret
+        )
+
+        # Authenticate first
+        {:ok, adapter} = DeribitAdapter.authenticate(adapter)
+
+        # Send authenticated request
+        assert {:ok, response} = DeribitAdapter.send_request(adapter, "private/get_account_summary", %{
+          currency: "BTC"
+        })
+
+        assert response["result"]
+        assert Map.has_key?(response["result"], "balance")
+        assert Map.has_key?(response["result"], "equity")
+
+        # Clean up
+        DeribitAdapter.close(adapter)
+      else
+        Logger.debug("Set DERIBIT_CLIENT_ID and DERIBIT_CLIENT_SECRET environment variables to run this test")
+      end
+    end
+  end
+
+  describe "DeribitAdapter.close/1" do
+    test "closes the connection" do
+      {:ok, adapter} = DeribitAdapter.connect()
+      
+      # Store the server_pid to check later
+      server_pid = adapter.client.server_pid
+      
+      # Verify connection is alive
+      assert Process.alive?(server_pid)
+      
+      # Close the connection
+      assert :ok = DeribitAdapter.close(adapter)
+      
+      # Give it a moment to close
+      Process.sleep(100)
+      
+      # Verify server process is stopped
+      refute Process.alive?(server_pid)
+    end
+  end
 end

@@ -11,6 +11,7 @@ defmodule WebsockexAdapter.Examples.DeribitAdapter do
   use WebsockexAdapter.JsonRpc
 
   alias WebsockexAdapter.Client
+  alias WebsockexAdapter.JsonRpc
   alias WebsockexAdapter.MessageHandler
 
   require Logger
@@ -280,5 +281,26 @@ defmodule WebsockexAdapter.Examples.DeribitAdapter do
 
   defp default_error_handler(error) do
     Logger.debug("API error: #{inspect(error)}")
+  end
+
+  @doc """
+  Send a generic request to Deribit API.
+  """
+  @spec send_request(t(), String.t(), map()) :: {:ok, term()} | {:error, term()}
+  def send_request(%__MODULE__{client: client}, method, params \\ %{}) do
+    {:ok, request} = JsonRpc.build_request(method, params)
+
+    case Client.send_message(client, Jason.encode!(request)) do
+      {:ok, response} -> {:ok, response}
+      error -> error
+    end
+  end
+
+  @doc """
+  Close the WebSocket connection.
+  """
+  @spec close(t()) :: :ok
+  def close(%__MODULE__{client: client}) do
+    Client.close(client)
   end
 end
