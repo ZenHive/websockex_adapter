@@ -3,7 +3,6 @@ defmodule WebsockexAdapter.ErrorIntegrationTest do
 
   alias WebsockexAdapter.Client
   alias WebsockexAdapter.ErrorHandler
-  alias WebsockexAdapter.Examples.DeribitAdapter
 
   @moduletag :integration
 
@@ -91,20 +90,7 @@ defmodule WebsockexAdapter.ErrorIntegrationTest do
       Client.close(client)
     end
 
-    test "DeribitAdapter handles API errors" do
-      error_response = %{
-        "jsonrpc" => "2.0",
-        "id" => 1,
-        "error" => %{
-          "code" => -32_602,
-          "message" => "invalid_credentials"
-        }
-      }
-
-      # This tests our error handling logic without needing network calls
-      result = DeribitAdapter.handle_message({:text, Jason.encode!(error_response)})
-      assert result == :ok
-    end
+    # This test was moved to market_maker project along with DeribitAdapter
   end
 
   describe "protocol errors" do

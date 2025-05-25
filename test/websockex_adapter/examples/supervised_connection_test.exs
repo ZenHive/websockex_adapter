@@ -167,7 +167,7 @@ defmodule WebsockexAdapter.Examples.SupervisedConnectionTest do
       Process.exit(client.server_pid, :kill)
       Process.sleep(200)
 
-      # Note: In a real implementation with supervision, you'd need to 
+      # Note: In a real implementation with supervision, you'd need to
       # reacquire the client reference after restart. This is just testing
       # the supervision pattern.
       new_clients = ClientSupervisor.list_clients()

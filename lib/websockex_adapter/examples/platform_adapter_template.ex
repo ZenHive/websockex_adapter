@@ -19,19 +19,19 @@ defmodule WebsockexAdapter.Examples.PlatformAdapterTemplate do
   def authenticate(client, credentials) do
     # Platform-specific auth message
     auth_msg = %{method: "auth", params: credentials}
-    Client.send_message(client, auth_msg)
+    Client.send_message(client, Jason.encode!(auth_msg))
   end
 
   @doc "Subscribe to platform channels"
   def subscribe(client, channels) do
     # Platform-specific subscription format
     sub_msg = %{method: "subscribe", channels: channels}
-    Client.send_message(client, sub_msg)
+    Client.send_message(client, Jason.encode!(sub_msg))
   end
 
   @doc "Send platform request"
   def request(client, method, params \\ %{}) do
-    Client.send_message(client, %{method: method, params: params})
+    Client.send_message(client, Jason.encode!(%{method: method, params: params}))
   end
 
   @doc "Handle incoming platform messages"

@@ -9,12 +9,12 @@ All examples have comprehensive test coverage and demonstrate real-world usage p
 ### Core Examples (in `examples/docs/`)
 - **[Basic Usage](../lib/websockex_adapter/examples/docs/basic_usage.ex)** - Basic connection and messaging patterns ([tests](../test/websockex_adapter/examples/basic_usage_test.exs))
 - **[Error Handling](../lib/websockex_adapter/examples/docs/error_handling.ex)** - Robust error recovery patterns ([tests](../test/websockex_adapter/examples/error_handling_test.exs))
-- **[JSON-RPC Client](../lib/websockex_adapter/examples/docs/json_rpc_client.ex)** - JSON-RPC 2.0 protocol usage ([tests](../test/websockex_adapter/examples/json_rpc_integration_test.exs))
+- **[JSON-RPC Client](../lib/websockex_adapter/examples/docs/json_rpc_client.ex)** - JSON-RPC 2.0 protocol usage
 - **[Subscription Management](../lib/websockex_adapter/examples/docs/subscription_management.ex)** - Channel subscription patterns ([tests](../test/websockex_adapter/examples/subscription_management_test.exs))
 
 ### Platform Adapters
-- **[Deribit Adapter](../lib/websockex_adapter/examples/deribit_adapter.ex)** - Complete Deribit exchange integration ([tests](../test/websockex_adapter/examples/deribit_adapter_test.exs))
-- **[Deribit GenServer Adapter](../lib/websockex_adapter/examples/deribit_genserver_adapter.ex)** - Supervised Deribit adapter with automatic recovery ([tests](../test/websockex_adapter/examples/deribit_genserver_adapter_test.exs))
+- **Platform Adapter Template** - Template for creating platform-specific adapters (see platform_adapter_template.ex)
+- **Deribit Integration** - Complete examples moved to market_maker project for better separation of concerns
 
 ### Architecture Examples
 - **[Adapter Supervisor](../lib/websockex_adapter/examples/adapter_supervisor.ex)** - Fault-tolerant supervision patterns
@@ -44,41 +44,16 @@ alias WebsockexAdapter.Examples.Docs.BasicUsage
 {:ok, client} = BasicUsage.connect_with_headers("wss://echo.websocket.org", "Bearer token123")
 ```
 
-### Deribit Integration Example
+### Platform Integration Example
 
-First, set your Deribit credentials:
+For comprehensive platform integration examples (including Deribit), see the `market_maker` project which demonstrates:
+- Authentication flows
+- Supervised adapters with automatic recovery
+- Market data subscriptions
+- Trading operations
+- Error handling and reconnection
 
-```bash
-export DERIBIT_CLIENT_ID="your_client_id"
-export DERIBIT_CLIENT_SECRET="your_client_secret"
-```
-
-Then run the examples:
-
-```elixir
-# Using the basic Deribit adapter
-alias WebsockexAdapter.Examples.DeribitAdapter
-
-{:ok, adapter} = DeribitAdapter.connect(
-  client_id: System.get_env("DERIBIT_CLIENT_ID"),
-  client_secret: System.get_env("DERIBIT_CLIENT_SECRET"),
-  test_mode: true
-)
-
-# Subscribe to market data
-{:ok, _} = DeribitAdapter.subscribe(adapter, ["book.BTC-PERPETUAL.raw"])
-
-# Using the supervised GenServer adapter
-alias WebsockexAdapter.Examples.DeribitGenServerAdapter
-
-{:ok, adapter} = DeribitGenServerAdapter.start_link(
-  client_id: System.get_env("DERIBIT_CLIENT_ID"),
-  client_secret: System.get_env("DERIBIT_CLIENT_SECRET")
-)
-
-# The GenServer adapter handles reconnection and recovery automatically
-{:ok, _} = DeribitGenServerAdapter.subscribe(adapter, ["ticker.BTC-PERPETUAL.raw"])
-```
+The WebsockexAdapter library provides the infrastructure, while platform-specific business logic resides in dedicated projects.
 
 ## Example Patterns
 
@@ -158,7 +133,7 @@ mix test --cover test/websockex_adapter/examples/
 
 To create an adapter for your platform:
 
-1. Study the [Deribit adapter implementation](../lib/websockex_adapter/examples/deribit_adapter.ex)
+1. Study the platform adapter template in `examples/platform_adapter_template.ex`
 2. Follow the [adapter building guide](guides/building_adapters.md)
 3. Implement platform-specific:
    - Authentication flow

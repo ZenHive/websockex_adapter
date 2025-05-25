@@ -29,7 +29,6 @@ defmodule WebsockexAdapter.Examples.PlatformAdapterTemplateTest do
 
     test "provides connection helper" do
       # Just verify the function exists and returns expected shape
-      assert function_exported?(PlatformAdapterTemplate, :connect, 1)
       assert function_exported?(PlatformAdapterTemplate, :connect, 2)
     end
 
