@@ -53,6 +53,14 @@ end
 :ok = WebsockexAdapter.Client.close(client)
 ```
 
+For more detailed examples, see our working examples with fully tested implementations:
+- **Basic Usage** - Connection management and messaging
+- **Error Handling** - Robust error recovery patterns  
+- **JSON-RPC Client** - JSON-RPC 2.0 protocol usage
+- **Subscription Management** - Channel subscription patterns
+
+See the [Examples Guide](https://hexdocs.pm/websockex_adapter/Examples.html) for complete code samples and usage patterns.
+
 ### Deribit Integration
 
 ```elixir
@@ -156,7 +164,7 @@ mix check            # Run all quality checks
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## Links
 

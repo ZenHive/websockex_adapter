@@ -59,9 +59,9 @@ defmodule WebsockexAdapter.JsonRpc do
   Matches a JSON-RPC response to determine if it's a result or error.
 
   Returns:
-  - {:ok, result} for successful responses
-  - {:error, {code, message}} for JSON-RPC errors
-  - {:notification, method, params} for notifications
+  - `{:ok, result}` for successful responses
+  - `{:error, {code, message}}` for JSON-RPC errors
+  - `{:notification, method, params}` for notifications
   """
   @spec match_response(map()) :: {:ok, term()} | {:error, {integer(), String.t()}} | {:notification, String.t(), map()}
   def match_response(%{"result" => result}), do: {:ok, result}
