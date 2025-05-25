@@ -133,7 +133,7 @@ defmodule WebsockexAdapter.MixProject do
   # Add aliases for code quality tools
   defp aliases do
     [
-      lint: ["credo --strict"],
+      lint: ["mix format && credo --strict"],
       typecheck: ["dialyzer"],
       security: ["sobelow --exit --config"],
       coverage: ["test --cover"],
