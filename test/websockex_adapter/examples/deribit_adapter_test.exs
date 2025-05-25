@@ -219,11 +219,12 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
       {:ok, adapter} = DeribitAdapter.connect()
 
       # Get instruments for BTC
-      assert {:ok, response} = DeribitAdapter.send_request(adapter, "public/get_instruments", %{
-        currency: "BTC",
-        kind: "future"
-      })
-      
+      assert {:ok, response} =
+               DeribitAdapter.send_request(adapter, "public/get_instruments", %{
+                 currency: "BTC",
+                 kind: "future"
+               })
+
       assert response["result"]
       assert is_list(response["result"])
 
@@ -237,18 +238,20 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
       client_secret = System.get_env("DERIBIT_CLIENT_SECRET")
 
       if client_id && client_secret do
-        {:ok, adapter} = DeribitAdapter.connect(
-          client_id: client_id,
-          client_secret: client_secret
-        )
+        {:ok, adapter} =
+          DeribitAdapter.connect(
+            client_id: client_id,
+            client_secret: client_secret
+          )
 
         # Authenticate first
         {:ok, adapter} = DeribitAdapter.authenticate(adapter)
 
         # Send authenticated request
-        assert {:ok, response} = DeribitAdapter.send_request(adapter, "private/get_account_summary", %{
-          currency: "BTC"
-        })
+        assert {:ok, response} =
+                 DeribitAdapter.send_request(adapter, "private/get_account_summary", %{
+                   currency: "BTC"
+                 })
 
         assert response["result"]
         assert Map.has_key?(response["result"], "balance")
@@ -265,19 +268,19 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
   describe "DeribitAdapter.close/1" do
     test "closes the connection" do
       {:ok, adapter} = DeribitAdapter.connect()
-      
+
       # Store the server_pid to check later
       server_pid = adapter.client.server_pid
-      
+
       # Verify connection is alive
       assert Process.alive?(server_pid)
-      
+
       # Close the connection
       assert :ok = DeribitAdapter.close(adapter)
-      
+
       # Give it a moment to close
       Process.sleep(100)
-      
+
       # Verify server process is stopped
       refute Process.alive?(server_pid)
     end

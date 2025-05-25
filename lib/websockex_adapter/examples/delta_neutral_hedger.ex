@@ -7,8 +7,10 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
   """
 
   use GenServer
-  require Logger
+
   alias WebsockexAdapter.Examples.DeribitAdapter
+
+  require Logger
 
   @type pair :: %{
           long: String.t(),
@@ -102,7 +104,7 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
   def handle_cast({:enable_auto_hedge, opts}, state) do
     interval = Keyword.get(opts, :interval, 5000)
     ref = Process.send_after(self(), :auto_hedge_check, interval)
-    
+
     {:noreply, %{state | auto_hedge: true, auto_hedge_ref: ref}}
   end
 
@@ -122,7 +124,7 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
   @impl true
   def handle_info(:auto_hedge_check, %{auto_hedge: true} = state) do
     exposures = calculate_exposures(state)
-    
+
     if abs(exposures.total_delta) > state.config.rebalance_threshold do
       execute_rebalance(state)
       notify_subscribers(state, {:auto_hedge_triggered, exposures})
@@ -147,7 +149,8 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
   ## Private Functions
 
   defp extract_instruments(pairs) do
-    Enum.flat_map(pairs, fn pair ->
+    pairs
+    |> Enum.flat_map(fn pair ->
       [pair.long, pair.short]
     end)
     |> Enum.uniq()
@@ -159,19 +162,21 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
         "ticker.#{instrument}.raw",
         "user.portfolio.any"
       ]
+
       DeribitAdapter.subscribe(adapter, channels)
     end)
   end
 
   defp calculate_exposures(state) do
-    positions = 
-      Enum.map(state.config.pairs, fn pair ->
+    positions =
+      state.config.pairs
+      |> Enum.map(fn pair ->
         long_pos = get_position(state, pair.long)
         short_pos = get_position(state, pair.short)
-        
+
         long_delta = calculate_delta(long_pos, get_price(state, pair.long))
         short_delta = calculate_delta(short_pos, get_price(state, pair.short))
-        
+
         [
           %{instrument: pair.long, delta: long_delta, price: get_price(state, pair.long)},
           %{instrument: pair.short, delta: short_delta, price: get_price(state, pair.short)}
@@ -180,8 +185,8 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
       |> List.flatten()
       |> Enum.uniq_by(& &1.instrument)
 
-    total_delta = Enum.reduce(positions, 0, & &1.delta + &2)
-    
+    total_delta = Enum.reduce(positions, 0, &(&1.delta + &2))
+
     %{
       total_delta: total_delta,
       positions: positions,
@@ -191,7 +196,7 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
 
   defp execute_rebalance(state) do
     exposures = calculate_exposures(state)
-    
+
     if exposures.hedge_required do
       orders = calculate_hedge_orders(state, exposures)
       {:ok, orders}
@@ -202,14 +207,14 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
 
   defp calculate_hedge_orders(state, exposures) do
     target_delta = -exposures.total_delta
-    
+
     state.config.pairs
     |> Enum.take(1)
     |> Enum.map(fn pair ->
       instrument = if target_delta > 0, do: pair.long, else: pair.short
       side = if target_delta > 0, do: "buy", else: "sell"
       size = min(abs(target_delta), state.config.max_order_size)
-      
+
       %{
         instrument: instrument,
         side: side,
@@ -225,10 +230,10 @@ defmodule WebsockexAdapter.Examples.DeltaNeutralHedger do
         instrument = parse_instrument_from_channel(channel)
         price = data["mark_price"] || data["last_price"]
         put_in(state, [:prices, instrument], price)
-        
+
       channel == "user.portfolio.any" ->
         update_positions(state, data)
-        
+
       true ->
         state
     end
