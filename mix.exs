@@ -96,7 +96,7 @@ defmodule WebsockexAdapter.MixProject do
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:doctor, "~> 0.22.0", only: :dev},
       # Tasks
-      {:task_validator, "~> 0.6.0", only: [:dev, :test], runtime: false},
+      {:task_validator, "~> 0.7.0", only: [:dev, :test], runtime: false},
 
       # Security scanning
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},

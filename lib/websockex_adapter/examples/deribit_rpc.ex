@@ -1,7 +1,7 @@
 defmodule WebsockexAdapter.Examples.DeribitRpc do
   @moduledoc """
   Shared Deribit JSON-RPC method definitions and request builders.
-  
+
   This module centralizes all Deribit RPC method definitions
   to avoid duplication across adapter examples.
   """
@@ -62,18 +62,28 @@ defmodule WebsockexAdapter.Examples.DeribitRpc do
 
   # Trading (Private)
   def buy(instrument, amount, opts \\ %{}) do
-    params = Map.merge(%{
-      instrument_name: instrument,
-      amount: amount
-    }, opts)
+    params =
+      Map.merge(
+        %{
+          instrument_name: instrument,
+          amount: amount
+        },
+        opts
+      )
+
     build_request("private/buy", params)
   end
 
   def sell(instrument, amount, opts \\ %{}) do
-    params = Map.merge(%{
-      instrument_name: instrument,
-      amount: amount
-    }, opts)
+    params =
+      Map.merge(
+        %{
+          instrument_name: instrument,
+          amount: amount
+        },
+        opts
+      )
+
     build_request("private/sell", params)
   end
 

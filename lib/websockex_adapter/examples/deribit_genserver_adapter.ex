@@ -1,13 +1,16 @@
 defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
   @moduledoc """
   Production-ready supervised Deribit adapter with automatic reconnection.
-  
+
   Features: Monitor WebSocket client, auto-reconnect, restore auth/subscriptions.
   Only 5 public functions for clean API. See DeribitRpc for available methods.
   """
 
   use GenServer
-  alias WebsockexAdapter.{Client, Examples.DeribitRpc}
+
+  alias WebsockexAdapter.Client
+  alias WebsockexAdapter.Examples.DeribitRpc
+
   require Logger
 
   @deribit_test_url "wss://test.deribit.com/ws/api/v2"
@@ -26,10 +29,17 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
   @impl true
   def init(opts) do
     state = %{
-      client: nil, monitor_ref: nil, authenticated: false, was_authenticated: false,
-      subscriptions: MapSet.new(), client_id: opts[:client_id], client_secret: opts[:client_secret],
-      url: opts[:url] || @deribit_test_url, opts: opts
+      client: nil,
+      monitor_ref: nil,
+      authenticated: false,
+      was_authenticated: false,
+      subscriptions: MapSet.new(),
+      client_id: opts[:client_id],
+      client_secret: opts[:client_secret],
+      url: opts[:url] || @deribit_test_url,
+      opts: opts
     }
+
     send(self(), :connect)
     {:ok, state}
   end
@@ -37,32 +47,46 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
   @impl true
   def handle_call(request, _from, state) do
     case {request, state} do
-      {:authenticate, %{client: nil}} -> {:reply, {:error, :not_connected}, state}
-      {:authenticate, %{client_id: nil}} -> {:reply, {:error, :missing_credentials}, state}
+      {:authenticate, %{client: nil}} ->
+        {:reply, {:error, :not_connected}, state}
+
+      {:authenticate, %{client_id: nil}} ->
+        {:reply, {:error, :missing_credentials}, state}
+
       {:authenticate, %{client: client}} ->
         req = DeribitRpc.auth_request(state.client_id, state.client_secret)
+
         case Client.send_message(client, Jason.encode!(req)) do
           {:ok, %{"result" => %{"access_token" => _}}} ->
             Client.send_message(client, Jason.encode!(DeribitRpc.set_heartbeat(30)))
             {:reply, :ok, %{state | authenticated: true, was_authenticated: true}}
-          error -> {:reply, error, state}
+
+          error ->
+            {:reply, error, state}
         end
-        
-      {{:subscribe, _}, %{client: nil}} -> {:reply, {:error, :not_connected}, state}
+
+      {{:subscribe, _}, %{client: nil}} ->
+        {:reply, {:error, :not_connected}, state}
+
       {{:subscribe, channels}, %{client: client}} ->
         case Client.send_message(client, Jason.encode!(DeribitRpc.subscribe(channels))) do
           {:ok, %{"result" => _}} ->
             new_subs = Enum.reduce(channels, state.subscriptions, &MapSet.put(&2, &1))
             {:reply, :ok, %{state | subscriptions: new_subs}}
-          error -> {:reply, error, state}
+
+          error ->
+            {:reply, error, state}
         end
-        
-      {{:send_request, _, _}, %{client: nil}} -> {:reply, {:error, :not_connected}, state}
+
+      {{:send_request, _, _}, %{client: nil}} ->
+        {:reply, {:error, :not_connected}, state}
+
       {{:send_request, method, params}, %{client: client}} ->
         req = DeribitRpc.build_request(method, params)
         {:reply, Client.send_message(client, Jason.encode!(req)), state}
-        
-      {:get_state, _} -> {:reply, {:ok, state}, state}
+
+      {:get_state, _} ->
+        {:reply, {:ok, state}, state}
     end
   end
 
@@ -72,16 +96,20 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
       heartbeat_config: %{type: :deribit, interval: (state.opts[:heartbeat_interval] || 30) * 1000},
       reconnect_on_error: false
     ]
+
     opts = if h = state.opts[:handler], do: Keyword.put(opts, :handler, h), else: opts
 
     case Client.connect(state.url, opts) do
       {:ok, client} ->
         ref = Process.monitor(client.server_pid)
         new_state = %{state | client: client, monitor_ref: ref}
+
         if state.was_authenticated or MapSet.size(state.subscriptions) > 0 do
           send(self(), :restore_state)
         end
+
         {:noreply, new_state}
+
       {:error, reason} ->
         Logger.warning("Connect failed: #{inspect(reason)}")
         Process.send_after(self(), :connect, @reconnect_delay)
@@ -101,16 +129,17 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
         {:reply, _, state} = handle_call(:authenticate, nil, state)
         if MapSet.size(state.subscriptions) > 0, do: send(self(), :restore_subs)
         {:noreply, state}
-        
+
       MapSet.size(state.subscriptions) > 0 ->
         channels = MapSet.to_list(state.subscriptions)
         {:reply, _, state} = handle_call({:subscribe, channels}, nil, %{state | subscriptions: MapSet.new()})
         {:noreply, state}
-        
-      true -> {:noreply, state}
+
+      true ->
+        {:noreply, state}
     end
   end
-  
+
   def handle_info(:restore_subs, %{subscriptions: subs} = state) when map_size(subs) > 0 do
     channels = MapSet.to_list(subs)
     {:reply, _, state} = handle_call({:subscribe, channels}, nil, %{state | subscriptions: MapSet.new()})

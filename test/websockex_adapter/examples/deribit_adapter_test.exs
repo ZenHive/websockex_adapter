@@ -99,67 +99,8 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
     end
   end
 
-  describe "DeribitAdapter.handle_message/1" do
-    test "handles heartbeat test_request messages" do
-      # Heartbeats are now handled automatically by the Client module
-      # DeribitAdapter just passes them through
-      heartbeat_message = %{
-        "method" => "heartbeat",
-        "params" => %{"type" => "test_request"}
-      }
-
-      json_message = Jason.encode!(heartbeat_message)
-      assert :ok = DeribitAdapter.handle_message({:text, json_message})
-    end
-
-    test "handles regular messages without error" do
-      regular_message = %{
-        "jsonrpc" => "2.0",
-        "method" => "subscription",
-        "params" => %{
-          "channel" => "deribit_price_index.btc_usd",
-          "data" => %{"price" => 50_000}
-        }
-      }
-
-      json_message = Jason.encode!(regular_message)
-      assert :ok = DeribitAdapter.handle_message({:text, json_message})
-    end
-
-    test "handles malformed JSON gracefully" do
-      malformed_json = "{\"invalid\": json}"
-      assert :ok = DeribitAdapter.handle_message({:text, malformed_json})
-    end
-
-    test "handles non-text frames" do
-      assert :ok = DeribitAdapter.handle_message({:binary, <<1, 2, 3>>})
-      assert :ok = DeribitAdapter.handle_message({:ping, "ping_data"})
-    end
-  end
-
-  describe "DeribitAdapter.create_message_handler/1" do
-    test "creates a functional message handler" do
-      handler = DeribitAdapter.create_message_handler()
-      assert is_function(handler, 1)
-
-      # Test with a sample frame
-      test_frame = {:text, Jason.encode!(%{"test" => "message"})}
-      assert :ok = handler.(test_frame)
-    end
-
-    test "creates handler with custom callbacks" do
-      test_pid = self()
-
-      handler =
-        DeribitAdapter.create_message_handler(on_message: fn msg -> send(test_pid, {:custom_message, msg}) end)
-
-      test_frame = {:text, Jason.encode!(%{"test" => "message"})}
-      # The handler expects messages in the format {:message, frame}
-      handler.({:message, test_frame})
-
-      assert_receive {:custom_message, ^test_frame}
-    end
-  end
+  # Note: handle_message and create_message_handler were removed in the simplified adapter
+  # Message handling is now done directly by the Client module
 
   @tag :integration
   @tag :skip_unless_env
@@ -212,7 +153,7 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
       assert is_binary(response["result"]["version"])
 
       # Clean up
-      DeribitAdapter.close(adapter)
+      Client.close(adapter.client)
     end
 
     test "sends request with parameters" do
@@ -229,7 +170,7 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
       assert is_list(response["result"])
 
       # Clean up
-      DeribitAdapter.close(adapter)
+      Client.close(adapter.client)
     end
 
     @tag :skip_unless_env
@@ -258,31 +199,13 @@ defmodule WebsockexAdapter.Examples.DeribitAdapterTest do
         assert Map.has_key?(response["result"], "equity")
 
         # Clean up
-        DeribitAdapter.close(adapter)
+        Client.close(adapter.client)
       else
         Logger.debug("Set DERIBIT_CLIENT_ID and DERIBIT_CLIENT_SECRET environment variables to run this test")
       end
     end
   end
 
-  describe "DeribitAdapter.close/1" do
-    test "closes the connection" do
-      {:ok, adapter} = DeribitAdapter.connect()
-
-      # Store the server_pid to check later
-      server_pid = adapter.client.server_pid
-
-      # Verify connection is alive
-      assert Process.alive?(server_pid)
-
-      # Close the connection
-      assert :ok = DeribitAdapter.close(adapter)
-
-      # Give it a moment to close
-      Process.sleep(100)
-
-      # Verify server process is stopped
-      refute Process.alive?(server_pid)
-    end
-  end
+  # Note: close/1 was removed in the simplified adapter
+  # Use Client.close(adapter.client) directly instead
 end
