@@ -7,14 +7,11 @@
 | --------- | ------------------------------------------------ | ----------- | -------- | -------- | ------------- |
 | WNX0026   | Prepare for Hex.pm Publishing                    | Planned     | High     |          |               |
 | WNX0027   | Ensure All Examples Have Working Implementations | Planned | High     |          |               |
-| WNX0027-1 | ├─ Implement RateLimitedClient Example          | Planned     | High     |          |               |
-| WNX0027-2 | ├─ Implement MyTradingSystem Example            | Planned     | Medium   |          |               |
-| WNX0027-3 | ├─ Implement DeribitMarketDataHandler Example   | Planned     | Medium   |          |               |
-| WNX0027-4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned     | Low      |          |               |
+| WNX0027-1 | ├─ Implement RateLimitedClient Example          | Planned    | Medium   |          |               |
+| WNX0027-2 | ├─ Implement MyTradingSystem Example            | Planned    | Low      |          |               |
+| WNX0027-4 | ├─ Implement DeribitTelemetryAdapter Example    | Planned    | Low      |          |               |
 | WNX0027-5 | ├─ Implement BatchSubscriptionManager Example    | Completed   | High     | System   | ⭐⭐⭐⭐⭐    |
 | WNX0027-6 | ├─ Implement PositionTracker Example            | Completed   | Critical | System   | ⭐⭐⭐⭐⭐    |
-| WNX0027-7 | ├─ Implement OptionsGreeksMonitor Example       | Planned     | High     |          |               |
-| WNX0027-8 | ├─ Implement MarketMakerQuoter Example          | Planned     | High     |          |               |
 | WNX0027-9 | └─ Implement DeltaNeutralHedger Example         | Completed   | Critical | System   | ⭐⭐⭐⭐⭐    |
 
 ## Completed Tasks
@@ -37,8 +34,8 @@
 - **Production Ready**: Financial-grade reliability with real API testing achieved
 
 ### 🚀 Next Up
-- **WNX0027-5**: BatchSubscriptionManager Example - Critical for managing high-volume data feeds
 - **WNX0026**: Prepare for Hex.pm Publishing - Make the library available to the Elixir community
+- **Deferred Examples**: Remaining WNX0027 subtasks deferred to focus on package publishing
 
 
 ## WebSocket Client Architecture
@@ -206,7 +203,7 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Monitoring approach: Track request rates and backoff events
 - Report rate limit effectiveness metrics
 
-**Status**: Planned
+**Status**: Deferred
 
 #### 2. Implement MyTradingSystem Example (WNX0027-2)
 
@@ -238,39 +235,9 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Monitoring approach: Track order success/failure rates
 - Report trading system health metrics
 
-**Status**: Planned
+**Status**: Deferred
 
-#### 3. Implement DeribitMarketDataHandler Example (WNX0027-3)
 
-**Description**: Create a working implementation of the DeribitMarketDataHandler example showing market data processing.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement market data processing with subscription management
-- Error pattern for this task: Market data parsing errors handled gracefully
-- Focus on efficient data processing patterns
-
-**Error Reporting**
-- Log data processing errors with message context
-- Monitoring approach: Track message processing rates and errors
-- Report data quality and latency metrics
-
-**Status**: Planned
 
 #### 4. Implement DeribitTelemetryAdapter Example (WNX0027-4)
 
@@ -302,7 +269,7 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Monitoring approach: Self-monitoring of telemetry system health
 - Report telemetry collection effectiveness
 
-**Status**: Planned
+**Status**: Deferred
 
 #### 5. Implement BatchSubscriptionManager Example (WNX0027-5)
 
@@ -334,7 +301,7 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Monitoring approach: Track subscription success rates and batch efficiency
 - Report subscription system performance
 
-**Status**: Planned
+**Status**: Completed
 
 #### 6. Implement PositionTracker Example (WNX0027-6)
 
@@ -368,69 +335,7 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 
 **Status**: Planned
 
-#### 7. Implement OptionsGreeksMonitor Example (WNX0027-7)
 
-**Description**: Create a working implementation of the OptionsGreeksMonitor example showing options Greeks monitoring.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement options Greeks monitoring with real-time calculations
-- Error pattern for this task: Greeks calculation errors handled with fallback values
-- Focus on risk management monitoring
-
-**Error Reporting**
-- Log Greeks calculation errors with market context
-- Monitoring approach: Track calculation accuracy and performance
-- Report risk metrics and system reliability
-
-**Status**: Planned
-
-#### 8. Implement MarketMakerQuoter Example (WNX0027-8)
-
-**Description**: Create a working implementation of the MarketMakerQuoter example demonstrating market making patterns.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement market making with quote management
-- Error pattern for this task: Quote rejection errors handled with re-quote logic
-- Focus on efficient market making patterns
-
-**Error Reporting**
-- Log quote lifecycle and rejections
-- Monitoring approach: Track quote acceptance rates and latency
-- Report market making effectiveness metrics
-
-**Status**: Planned
 
 #### 9. Implement DeltaNeutralHedger Example (WNX0027-9)
 
@@ -618,8 +523,8 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Test batch operations with mixed success/rejection
 - Integration test with real WebSocket connection
 
-**Status**: Planned
-**Priority**: High
+**Status**: Deferred
+**Priority**: Medium
 **Estimated LOC**: ~50 lines
 
 ---
@@ -641,8 +546,8 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Test parallel market data fetching
 - Mock responses for non-critical API calls to avoid rate limits
 
-**Status**: Planned
-**Priority**: Medium
+**Status**: Deferred
+**Priority**: Low
 **Estimated LOC**: ~80 lines
 
 ---
@@ -666,8 +571,8 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Test trade statistics calculation (VWAP)
 - Test telemetry event emission
 
-**Status**: Planned
-**Priority**: Medium
+**Status**: Deferred
+**Priority**: Low
 **Estimated LOC**: ~200 lines (largest example)
 
 ---
@@ -691,7 +596,7 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Test health check monitoring
 - Verify telemetry event payloads
 
-**Status**: Planned
+**Status**: Deferred
 **Priority**: Low
 **Estimated LOC**: ~150 lines
 
@@ -862,8 +767,8 @@ PositionTracker.subscribe_updates(tracker, self())
 - Test IV tracking
 - Mock Greeks data for testing
 
-**Status**: Planned
-**Priority**: High
+**Status**: Deferred
+**Priority**: Medium
 **Estimated LOC**: ~180 lines
 
 ---
@@ -917,8 +822,8 @@ PositionTracker.subscribe_updates(tracker, self())
 - Test quote updates on fills
 - Integration test with real order placement
 
-**Status**: Planned
-**Priority**: High
+**Status**: Deferred
+**Priority**: Medium
 **Estimated LOC**: ~200 lines
 
 ---
@@ -996,13 +901,15 @@ PositionTracker.subscribe_updates(tracker, self())
 **Implementation Order**:
 1. **WNX0027-6** - PositionTracker (critical for all traders) ✅ COMPLETED
 2. **WNX0027-9** - DeltaNeutralHedger (critical for delta-neutral strategies) ✅ COMPLETED
-3. **WNX0027-5** - BatchSubscriptionManager (critical for data feeds) ⬅️ NEXT
-4. **WNX0027-8** - MarketMakerQuoter (core market making)
-5. **WNX0027-7** - OptionsGreeksMonitor (options specific)
-6. **WNX0027-1** - RateLimitedClient (general purpose)
-7. **WNX0027-2** - MyTradingSystem (builds on basics)
-8. **WNX0027-3** - DeribitMarketDataHandler (performance optimization)
-9. **WNX0027-4** - DeribitTelemetryAdapter (monitoring enhancement)
+3. **WNX0027-5** - BatchSubscriptionManager (critical for data feeds) ✅ COMPLETED
+
+**Deferred for Later**:
+- **WNX0027-1** - RateLimitedClient (general purpose) - Deferred
+- **WNX0027-2** - MyTradingSystem (builds on basics) - Deferred
+- **WNX0027-3** - DeribitMarketDataHandler (performance optimization) - Deferred
+- **WNX0027-4** - DeribitTelemetryAdapter (monitoring enhancement) - Deferred
+- **WNX0027-7** - OptionsGreeksMonitor (options specific) - Deferred
+- **WNX0027-8** - MarketMakerQuoter (core market making) - Deferred
 
 
 **📁 Archive Reference**: Full specifications, implementation details, and architectural decisions for all completed tasks are maintained in [`docs/archive/completed_tasks.md`](docs/archive/completed_tasks.md). Foundation tasks (WNX0010-WNX0018) and recent infrastructure tasks (WNX0019, WNX0020, WNX0023) are documented there with complete technical details.
