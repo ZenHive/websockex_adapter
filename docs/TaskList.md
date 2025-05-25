@@ -6,14 +6,12 @@
 | ID        | Description                                      | Status      | Priority | Assignee | Review Rating |
 | --------- | ------------------------------------------------ | ----------- | -------- | -------- | ------------- |
 | WNX0026   | Prepare for Hex.pm Publishing                    | Planned     | High     |          |               |
-| WNX0027   | Ensure All Examples Have Working Implementations | Planned | High     |          |               |
-| WNX0027-1 | ├─ Implement RateLimitedClient Example          | Planned    | Medium   |          |               |
-| WNX0027-2 | ├─ Implement MyTradingSystem Example            | Planned    | Low      |          |               |
-| WNX0027-4 | └─ Implement DeribitTelemetryAdapter Example    | Planned    | Low      |          |               |
+| WNX0028   | Document Business Logic Separation Guidelines    | Planned     | Medium   |          |               |
 
 ## Completed Tasks
 | ID      | Description                                      | Status    | Priority | Assignee | Review Rating | Archive Location |
 | ------- | ------------------------------------------------ | --------- | -------- | -------- | ------------- | ---------------- |
+| WNX0027 | Ensure All Examples Have Working Implementations | Completed | High     | System   | ⭐⭐⭐⭐⭐    | [📁 Archive](docs/archive/completed_tasks.md#wnx0027-ensure-all-examples-have-working-implementations--completed) |
 | WNX0019 | Heartbeat Implementation                         | Completed | Critical | System   | ⭐⭐⭐⭐⭐    | [📁 Archive](docs/archive/completed_tasks.md#wnx0019-heartbeat-implementation--completed) |
 | WNX0020 | Fault-Tolerant Adapter Architecture            | Completed | Critical | System   | ⭐⭐⭐⭐⭐    | [📁 Archive](docs/archive/completed_tasks.md#wnx0020-fault-tolerant-adapter-architecture--completed) |
 | WNX0021 | Request/Response Correlation Manager             | Completed | High     | System   | ⭐⭐⭐⭐⭐    | [📁 Archive](docs/archive/completed_tasks.md#wnx0021-request-response-correlation-manager--completed) |
@@ -27,6 +25,7 @@
 
 ## Development Status Update (May 2025)
 ### ✅ Recently Completed
+- **WNX0027**: Ensure All Examples Have Working Implementations - All valuable examples completed and tested
 - **WNX0027-5**: BatchSubscriptionManager Example - Efficient subscription batching (moved to archive)
 - **WNX0027-6**: PositionTracker Example - Real-time position and margin tracking (moved to archive)
 - **WNX0027-9**: DeltaNeutralHedger Example - Automated delta-neutral hedging (moved to archive)
@@ -173,106 +172,6 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Rate limit errors: Demonstrate backoff patterns
 - Invalid message errors: Show validation approaches
 
-#### 1. Implement RateLimitedClient Example (WNX0027-1)
-
-**Description**: Create a working implementation of the RateLimitedClient example showing rate limiting patterns.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement rate limiting using token bucket algorithm
-- Error pattern for this task: Rate limit exceeded errors handled with exponential backoff
-- Focus on preventing API rate limit violations
-
-**Error Reporting**
-- Log rate limit violations with context
-- Monitoring approach: Track request rates and backoff events
-- Report rate limit effectiveness metrics
-
-**Status**: Planned
-
-#### 2. Implement MyTradingSystem Example (WNX0027-2)
-
-**Description**: Create a working implementation of the MyTradingSystem example demonstrating basic trading patterns.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement basic trading system with order management
-- Error pattern for this task: Order rejection errors passed through with context
-- Focus on demonstrating core trading patterns
-
-**Error Reporting**
-- Log order lifecycle events
-- Monitoring approach: Track order success/failure rates
-- Report trading system health metrics
-
-**Status**: Planned
-
-
-
-#### 4. Implement DeribitTelemetryAdapter Example (WNX0027-4)
-
-**Description**: Create a working implementation of the DeribitTelemetryAdapter example demonstrating telemetry integration.
-
-**Error Handling**
-**Core Principles**
-- Pass raw errors
-- Use {:ok, result} | {:error, reason}
-- Let it crash
-
-**Error Implementation**
-- No wrapping
-- Minimal rescue
-- function/1 & /! versions
-
-**Error Examples**
-- Raw error passthrough
-- Simple rescue case
-- Supervisor handling
-
-**Task-Specific Approach**
-- Implement telemetry integration with metrics collection
-- Error pattern for this task: Telemetry errors don't affect main operations
-- Focus on observability and monitoring patterns
-
-**Error Reporting**
-- Log telemetry system failures
-- Monitoring approach: Self-monitoring of telemetry system health
-- Report telemetry collection effectiveness
-
-**Status**: Planned
-
-
-
 ---
 
 ## Implementation Order
@@ -398,83 +297,11 @@ Each example demonstrates one specific feature with minimal code complexity, fol
 - Invalid message errors: Show validation approaches
 
 **Sub-tasks**:
-- WNX0027-1: Implement RateLimitedClient Example
-- WNX0027-2: Implement MyTradingSystem Example
-- WNX0027-4: Implement DeribitTelemetryAdapter Example
 - WNX0027-5: Implement BatchSubscriptionManager Example ✅ COMPLETED (moved to archive)
 - WNX0027-6: Implement PositionTracker Example ✅ COMPLETED (moved to archive)
 - WNX0027-9: Implement DeltaNeutralHedger Example ✅ COMPLETED (moved to archive)
 
----
-
-### WNX0027-1: Implement RateLimitedClient Example
-**Description**: Create working implementation and tests for the RateLimitedClient example shown in docs/Examples.md (line 154).
-
-**Simplicity Principle**: Minimal wrapper showing how to integrate rate limiting with WebSocket operations.
-
-**Requirements**:
-- Create `lib/websockex_adapter/examples/rate_limited_client.ex`
-- Implement `send_order/3` function as shown in documentation
-- Maximum 3-4 functions demonstrating rate-limited operations
-- Create comprehensive tests in `test/websockex_adapter/examples/rate_limited_client_test.exs`
-
-**Test Scenarios**:
-- Test successful order when under rate limit
-- Test rate limit rejection when over limit
-- Test batch operations with mixed success/rejection
-- Integration test with real WebSocket connection
-
-**Status**: Planned
-**Priority**: Medium
-**Estimated LOC**: ~50 lines
-
----
-
-### WNX0027-2: Implement MyTradingSystem Example
-**Description**: Create working implementation for the MyTradingSystem advanced Deribit features example (line 273).
-
-**Simplicity Principle**: Show advanced Deribit features without creating a full trading system.
-
-**Requirements**:
-- Create `lib/websockex_adapter/examples/my_trading_system.ex`
-- Implement `setup_risk_management/1` and `get_market_state/2` functions
-- Use Task.async for parallel data fetching as shown
-- Create tests verifying risk management setup and market state retrieval
-
-**Test Scenarios**:
-- Test cancel-on-disconnect setup
-- Test heartbeat configuration
-- Test parallel market data fetching
-- Mock responses for non-critical API calls to avoid rate limits
-
-**Status**: Planned
-**Priority**: Low
-**Estimated LOC**: ~80 lines
-
----
-
-### WNX0027-4: Implement DeribitTelemetryAdapter Example
-**Description**: Create telemetry wrapper showing monitoring best practices (line 524).
-
-**Simplicity Principle**: Thin wrapper adding telemetry to existing adapter functions.
-
-**Requirements**:
-- Create `lib/websockex_adapter/examples/deribit_telemetry_adapter.ex`
-- Wrap key DeribitAdapter functions with telemetry
-- Implement connection health monitoring
-- Show telemetry handler setup
-- Create tests verifying telemetry events
-
-**Test Scenarios**:
-- Test connection attempt telemetry
-- Test request/response timing metrics
-- Test subscription telemetry
-- Test health check monitoring
-- Verify telemetry event payloads
-
-**Status**: Planned
-**Priority**: Low
-**Estimated LOC**: ~150 lines
+**Note**: Sub-tasks WNX0027-1, WNX0027-2, and WNX0027-4 were removed as they represented untested documentation examples without clear value. The project focuses on real, working examples with comprehensive tests.
 
 ---
 
@@ -507,6 +334,13 @@ Keep documentation focused and practical. Provide clear examples without overwhe
 - Remove or properly categorize development-only dependencies
 - Ensure documentation can be generated without errors
 - Add package badges (version, downloads, documentation)
+- Reorganize documentation to reference working examples in `examples/docs/`:
+  - `basic_usage.ex` (48 lines) - Basic connection and messaging
+  - `error_handling.ex` - Proper error handling patterns
+  - `json_rpc_client.ex` - JSON-RPC protocol patterns
+  - `subscription_management.ex` - Channel subscription patterns
+- Remove untested code snippets from docs/Examples.md
+- Create index/guide pointing to real, tested implementations
 
 **ExUnit Test Requirements**:
 - Test documentation examples compile and run correctly
@@ -562,6 +396,11 @@ Keep documentation focused and practical. Provide clear examples without overwhe
 - Example of Deribit integration
 - Contributing guidelines
 - License information
+- Examples section pointing to working code in `examples/docs/`:
+  - Replace untested snippets with references to real implementations
+  - Each example should link to its source file and test file
+  - Show how to run the examples
+  - Explain what each example demonstrates
 
 **Package Metadata Requirements**:
 - Accurate description field
@@ -635,6 +474,114 @@ Keep documentation focused and practical. Provide clear examples without overwhe
 4. Publish to hex.pm with `mix hex.publish`
 5. Verify package on hex.pm and hexdocs.pm
 6. Create GitHub release with changelog
+
+---
+
+### WNX0028: Document Business Logic Separation Guidelines
+**Description**: Create clear guidelines documenting the separation between WebSocket infrastructure (websockex_adapter) and trading business logic (market_maker), including examples of what belongs where and migration patterns for existing code.
+
+**Simplicity Progression Plan**:
+1. Document the architectural boundary between infrastructure and business logic
+2. Create checklist for evaluating whether code belongs in websockex_adapter
+3. Add examples of correct vs incorrect placement
+4. Update CLAUDE.md and contributing guidelines
+
+**Simplicity Principle**:
+Clear separation of concerns keeps both projects focused on their core responsibilities without unnecessary coupling.
+
+**Abstraction Evaluation**:
+- **Challenge**: How do we prevent business logic from creeping into infrastructure?
+- **Minimal Solution**: Clear documentation with concrete examples
+- **Justification**:
+  1. Prevents future PositionTracker/DeltaNeutralHedger situations
+  2. Keeps websockex_adapter reusable across different trading systems
+  3. Maintains clean architectural boundaries
+
+**Requirements**:
+- Document what belongs in websockex_adapter (infrastructure only)
+- Document what belongs in market_maker (trading strategies, position management)
+- Provide migration examples showing how to move business logic
+- Update CLAUDE.md with clear guidelines
+
+**ExUnit Test Requirements**:
+- No code changes, documentation only
+- Ensure all existing examples follow the guidelines
+- Verify no business logic remains in websockex_adapter
+
+**Integration Test Scenarios**:
+- Review all examples for business logic violations
+- Ensure platform adapters only provide API access, not strategies
+- Verify separation is maintained in documentation examples
+
+**Typespec Requirements**:
+- N/A - Documentation task
+
+**TypeSpec Documentation**:
+- N/A - Documentation task
+
+**TypeSpec Verification**:
+- N/A - Documentation task
+
+**Error Handling**
+**Core Principles**
+- Documentation clarity prevents architectural errors
+- Early detection of misplaced code
+- Clear migration paths
+**Error Implementation**
+- Examples of incorrect placement
+- Refactoring patterns
+- Review checklist
+**Error Examples**
+- Trading logic in adapter
+- Position tracking in infrastructure
+- Strategy code in examples
+**GenServer Specifics**
+- Infrastructure GenServers vs business GenServers
+- State management boundaries
+- Process supervision patterns
+
+**Code Quality KPIs**
+- Lines of code: 0 (documentation only)
+- Functions per module: 0
+- Lines per function: 0
+- Call depth: 0
+- Cyclomatic complexity: N/A
+- Test coverage: Review of existing code
+
+**Dependencies**
+- None - documentation task
+
+**Architecture Notes**
+- WebsockexAdapter: Connection, authentication, message transport only
+- Market Maker: Trading strategies, position tracking, risk management
+- Clear boundary prevents coupling and maintains reusability
+- Examples must demonstrate patterns, not trading strategies
+
+**Status**: Planned
+**Priority**: Medium
+
+**Implementation Notes**:
+- Reference recent moves of PositionTracker and DeltaNeutralHedger
+- Include decision tree for where code belongs
+- Add to PR review checklist
+
+**Complexity Assessment**:
+- Previous: Implicit understanding of boundaries
+- Current: Explicit documented guidelines
+- Added Complexity: None - reduces future complexity
+- Justification: Prevents architectural drift
+
+**Maintenance Impact**:
+- Easier code reviews with clear guidelines
+- Reduced refactoring when code is properly placed
+- Clear onboarding for new contributors
+- Maintains long-term architectural integrity
+
+**Error Handling Implementation**:
+- Code review process catches violations
+- Documentation provides clear correction path
+- Examples show proper separation
+- Migration guides for existing violations
 
 ---
 
