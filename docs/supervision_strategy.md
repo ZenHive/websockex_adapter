@@ -192,21 +192,32 @@ defmodule TradingSystem.DeribitConnection do
   end
   
   def init(opts) do
-    # Start supervised Deribit connection
-    {:ok, adapter} = WebsockexAdapter.Examples.SupervisedClient.start_deribit_connection(
+    # Start supervised connection
+    url = "wss://test.deribit.com/ws/api/v2"
+    config = [
+      heartbeat_config: %{type: :deribit, interval: 30_000},
+      retry_count: 10,
+      retry_delay: 1000
+    ]
+    
+    {:ok, client} = WebsockexAdapter.ClientSupervisor.start_client(url, config)
+    
+    # Create adapter with supervised client
+    adapter = %WebsockexAdapter.Examples.DeribitAdapter{
+      client: client,
+      authenticated: false,
+      subscriptions: MapSet.new(),
       client_id: opts[:client_id],
       client_secret: opts[:client_secret]
-    )
+    }
     
-    # Subscribe to required channels
-    WebsockexAdapter.Examples.DeribitAdapter.subscribe(adapter, [
+    # Authenticate and subscribe
+    {:ok, adapter} = WebsockexAdapter.Examples.DeribitAdapter.authenticate(adapter)
+    {:ok, adapter} = WebsockexAdapter.Examples.DeribitAdapter.subscribe(adapter, [
       "book.BTC-PERPETUAL.raw",
       "trades.BTC-PERPETUAL.raw",
       "user.orders.BTC-PERPETUAL.raw"
     ])
-    
-    # Start health monitoring
-    WebsockexAdapter.Examples.SupervisedClient.monitor_health(adapter.client)
     
     {:ok, %{adapter: adapter}}
   end
