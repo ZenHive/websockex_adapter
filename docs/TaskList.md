@@ -277,22 +277,22 @@ Keep documentation focused and practical. Provide clear examples without overwhe
 
 **Migration Plan**:
 
-**Move to `../market_maker/lib/deribit/`:**
+**Move to `../market_maker/lib/market_maker/examples/`:**
 ```elixir
-# Core Deribit trading functionality
-../market_maker/lib/deribit/adapter.ex              # deribit_adapter.ex
-../market_maker/lib/deribit/genserver_adapter.ex    # deribit_genserver_adapter.ex  
-../market_maker/lib/deribit/rpc.ex                  # deribit_rpc.ex
-../market_maker/lib/deribit/batch_subscription_manager.ex  # batch_subscription_manager.ex
+# Core Deribit trading functionality (all with complete typespecs and documentation)
+../market_maker/lib/market_maker/examples/deribit_adapter.ex              # deribit_adapter.ex
+../market_maker/lib/market_maker/examples/deribit_genserver_adapter.ex    # deribit_genserver_adapter.ex  
+../market_maker/lib/market_maker/examples/deribit_rpc.ex                  # deribit_rpc.ex
+../market_maker/lib/market_maker/examples/batch_subscription_manager.ex   # batch_subscription_manager.ex
 ```
 
-**Move to `../market_maker/test/deribit/`:**
+**Move to `../market_maker/test/market_maker/examples/`:**
 ```elixir
 # All Deribit-specific tests
-../market_maker/test/deribit/adapter_test.exs
-../market_maker/test/deribit/genserver_adapter_test.exs
-../market_maker/test/deribit/rpc_test.exs
-../market_maker/test/deribit/batch_subscription_manager_test.exs
+../market_maker/test/market_maker/examples/deribit_adapter_test.exs
+../market_maker/test/market_maker/examples/deribit_genserver_adapter_test.exs
+../market_maker/test/market_maker/examples/deribit_rpc_test.exs
+../market_maker/test/market_maker/examples/batch_subscription_manager_test.exs
 # Plus: heartbeat, stability, json_rpc integration tests
 ```
 
@@ -326,6 +326,8 @@ Clear separation of concerns keeps both projects focused on their core responsib
 3. **Reusability**: Framework examples remain as templates for other platforms
 4. **Maintainability**: Deribit-specific code can evolve independently
 5. **Dependency Management**: Market maker can depend on websockex_adapter, not vice versa
+6. **Type Safety**: All business logic files have comprehensive typespecs for safe migration
+7. **Documentation**: Complete API documentation makes integration straightforward
 
 **ExUnit Test Requirements**:
 - ✅ All examples categorized and analyzed
@@ -398,6 +400,8 @@ Clear separation of concerns keeps both projects focused on their core responsib
 - ✅ Clear categorization: 4 files need migration, 4 files stay as framework examples
 - ✅ Specific migration paths documented with target locations
 - ✅ Benefits and architectural improvements identified
+- ✅ Business logic files now have comprehensive typespecs and documentation
+- ✅ Files ready for clean migration with full type safety and API documentation
 - Decision framework created for future code placement
 
 **Complexity Assessment**:

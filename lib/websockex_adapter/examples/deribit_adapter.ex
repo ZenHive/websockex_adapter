@@ -28,7 +28,7 @@ defmodule WebsockexAdapter.Examples.DeribitAdapter do
 
   Options:
   - `:client_id` - Client ID for authentication
-  - `:client_secret` - Client secret for authentication  
+  - `:client_secret` - Client secret for authentication
   - `:url` - WebSocket URL (defaults to test.deribit.com)
   - `:handler` - Message handler function
   - `:heartbeat_interval` - Heartbeat interval in seconds (default: 30)

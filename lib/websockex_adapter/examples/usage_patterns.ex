@@ -18,7 +18,11 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
   - Development and testing
   - Short-lived connections
   - Scripts and one-off tasks
+
+  ## Returns
+  `:ok` after demonstrating the connection pattern.
   """
+  @spec direct_connection_example() :: :ok
   def direct_connection_example do
     # Simple connection
     {:ok, client} = Client.connect("wss://test.deribit.com/ws/api/v2")
@@ -38,6 +42,7 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
 
     # Clean up
     Client.close(client)
+    :ok
   end
 
   @doc """
@@ -49,7 +54,11 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
   - When you need a connection pool
 
   Note: You must add ClientSupervisor to your supervision tree first!
+
+  ## Returns
+  `:ok` after demonstrating the supervisor pattern.
   """
+  @spec client_supervisor_example() :: :ok
   def client_supervisor_example do
     # This assumes ClientSupervisor is already started in your app
     {:ok, client} =
@@ -67,6 +76,7 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
 
     # Stop a specific client (won't restart)
     ClientSupervisor.stop_client(client.server_pid)
+    :ok
   end
 
   @doc """
@@ -86,7 +96,11 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
           heartbeat_config: %{type: :deribit, interval: 30_000}
         ]}
       ]
+
+  ## Returns
+  A child specification tuple for use with Supervisor.
   """
+  @spec supervised_client_spec() :: {module(), keyword()}
   def supervised_client_spec do
     # This returns a child spec you can add to your supervisor
     {Client,
@@ -98,13 +112,17 @@ defmodule WebsockexAdapter.Examples.UsagePatterns do
      ]}
   end
 
-  # @doc """
-  # Example application module showing all patterns.
-  # """
   defmodule ExampleApp do
-    @moduledoc false
+    @moduledoc """
+    Example application module demonstrating all WebSocket connection patterns.
+
+    This module shows how to set up both dynamic (ClientSupervisor) and
+    static (direct child specs) WebSocket connections in your supervision tree.
+    """
     use Application
 
+    @impl true
+    @spec start(Application.start_type(), term()) :: {:ok, pid()} | {:error, term()}
     def start(_type, _args) do
       children = [
         # Pattern 2: Add ClientSupervisor for dynamic connections

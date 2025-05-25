@@ -16,12 +16,83 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
   @deribit_test_url "wss://test.deribit.com/ws/api/v2"
   @reconnect_delay 5_000
 
+  @type state :: %{
+          client: Client.t() | nil,
+          monitor_ref: reference() | nil,
+          authenticated: boolean(),
+          was_authenticated: boolean(),
+          subscriptions: MapSet.t(String.t()),
+          client_id: String.t() | nil,
+          client_secret: String.t() | nil,
+          url: String.t(),
+          opts: keyword()
+        }
+
   # Client API - Only 5 public functions
 
+  @doc """
+  Starts the Deribit adapter GenServer.
+
+  ## Options
+  - `:name` - GenServer name (required)
+  - `:client_id` - Deribit API client ID
+  - `:client_secret` - Deribit API client secret
+  - `:url` - WebSocket URL (defaults to test.deribit.com)
+  - `:heartbeat_interval` - Heartbeat interval in seconds
+  - `:handler` - Optional message handler module
+
+  ## Returns
+  `{:ok, pid}` on success.
+  """
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts), do: GenServer.start_link(__MODULE__, opts, name: opts[:name])
+
+  @doc """
+  Authenticates with Deribit using configured credentials.
+
+  ## Returns
+  - `:ok` on successful authentication
+  - `{:error, :not_connected}` if not connected
+  - `{:error, :missing_credentials}` if credentials not configured
+  """
+  @spec authenticate(GenServer.server()) :: :ok | {:error, atom()}
   def authenticate(adapter), do: GenServer.call(adapter, :authenticate)
+
+  @doc """
+  Subscribes to Deribit channels for real-time data.
+
+  ## Parameters
+  - `adapter` - The adapter GenServer
+  - `channels` - List of channel names
+
+  ## Returns
+  - `:ok` on successful subscription
+  - `{:error, :not_connected}` if not connected
+  """
+  @spec subscribe(GenServer.server(), list(String.t())) :: :ok | {:error, atom()}
   def subscribe(adapter, channels), do: GenServer.call(adapter, {:subscribe, channels})
+
+  @doc """
+  Sends a JSON-RPC request to Deribit.
+
+  ## Parameters
+  - `adapter` - The adapter GenServer
+  - `method` - RPC method name
+  - `params` - Method parameters (default: %{})
+
+  ## Returns
+  The response from Deribit or `{:error, :not_connected}`.
+  """
+  @spec send_request(GenServer.server(), String.t(), map()) :: {:ok, map()} | {:error, atom()}
   def send_request(adapter, method, params \\ %{}), do: GenServer.call(adapter, {:send_request, method, params})
+
+  @doc """
+  Returns the current adapter state.
+
+  ## Returns
+  `{:ok, state}` with the internal state map.
+  """
+  @spec get_state(GenServer.server()) :: {:ok, state()}
   def get_state(adapter), do: GenServer.call(adapter, :get_state)
 
   # Server callbacks
@@ -117,12 +188,14 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
     end
   end
 
+  @impl true
   def handle_info({:DOWN, ref, :process, _pid, reason}, %{monitor_ref: ref} = state) do
     Logger.warning("Client died: #{inspect(reason)}")
     send(self(), :connect)
     {:noreply, %{state | client: nil, monitor_ref: nil, authenticated: false}}
   end
 
+  @impl true
   def handle_info(:restore_state, state) do
     cond do
       not state.authenticated and state.was_authenticated ->
@@ -140,11 +213,13 @@ defmodule WebsockexAdapter.Examples.DeribitGenServerAdapter do
     end
   end
 
+  @impl true
   def handle_info(:restore_subs, %{subscriptions: subs} = state) when map_size(subs) > 0 do
     channels = MapSet.to_list(subs)
     {:reply, _, state} = handle_call({:subscribe, channels}, nil, %{state | subscriptions: MapSet.new()})
     {:noreply, state}
   end
 
+  @impl true
   def handle_info(_msg, state), do: {:noreply, state}
 end

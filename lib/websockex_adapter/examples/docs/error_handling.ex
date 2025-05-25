@@ -9,10 +9,30 @@ defmodule WebsockexAdapter.Examples.Docs.ErrorHandling do
 
   require Logger
 
+  @type state :: %{
+          client: pid() | nil,
+          url: String.t(),
+          opts: keyword(),
+          retry_count: non_neg_integer()
+        }
+
+  @doc """
+  Starts a GenServer that manages a WebSocket connection with automatic retry.
+
+  ## Parameters
+  - `url` - WebSocket URL to connect to
+  - `opts` - Connection options
+
+  ## Returns
+  `{:ok, pid}` on success or `{:error, reason}` on failure.
+  """
+  @spec start_link(String.t(), keyword()) :: GenServer.on_start()
   def start_link(url, opts \\ []) do
     GenServer.start_link(__MODULE__, {url, opts}, name: __MODULE__)
   end
 
+  @impl true
+  @spec init({String.t(), keyword()}) :: {:ok, state()}
   def init({url, opts}) do
     case Client.connect(url, opts) do
       {:ok, client} ->
@@ -26,6 +46,8 @@ defmodule WebsockexAdapter.Examples.Docs.ErrorHandling do
     end
   end
 
+  @impl true
+  @spec handle_info(term(), state()) :: {:noreply, state()}
   def handle_info(:retry_connect, %{url: url, opts: opts, retry_count: count} = state) do
     case Client.connect(url, opts) do
       {:ok, client} ->
@@ -50,14 +72,35 @@ defmodule WebsockexAdapter.Examples.Docs.ErrorHandling do
   end
 
   # Public API
+
+  @doc """
+  Sends a message through the WebSocket connection.
+
+  ## Parameters
+  - `message` - Message to send (will be JSON encoded)
+
+  ## Returns
+  - `:ok` on success
+  - `{:error, :not_connected}` if not connected
+  """
+  @spec send_message(term()) :: :ok | {:error, :not_connected}
   def send_message(message) do
     GenServer.call(__MODULE__, {:send_message, message})
   end
 
+  @doc """
+  Returns the current state of the error handler.
+
+  ## Returns
+  The internal state map including connection status and retry count.
+  """
+  @spec get_state() :: state()
   def get_state do
     GenServer.call(__MODULE__, :get_state)
   end
 
+  @impl true
+  @spec handle_call(term(), GenServer.from(), state()) :: {:reply, term(), state()}
   def handle_call({:send_message, _message}, _from, %{client: nil} = state) do
     {:reply, {:error, :not_connected}, state}
   end
@@ -72,6 +115,8 @@ defmodule WebsockexAdapter.Examples.Docs.ErrorHandling do
   end
 
   # Helper functions
+
+  @spec process_message(term()) :: :ok
   defp process_message(message) do
     Logger.debug("Processing message: #{inspect(message)}")
     # Application-specific message processing
