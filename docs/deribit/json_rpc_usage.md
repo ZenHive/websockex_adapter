@@ -4,7 +4,7 @@ This guide demonstrates how to use the JSON-RPC macro-generated methods for comm
 
 ## Overview
 
-The WebsockexAdapter.JsonRpc module provides a `defrpc` macro that automatically generates functions for JSON-RPC 2.0 API calls. The Deribit adapter includes 29 pre-defined methods covering authentication, market data, trading, and risk management.
+The ZenWebsocket.JsonRpc module provides a `defrpc` macro that automatically generates functions for JSON-RPC 2.0 API calls. The Deribit adapter includes 29 pre-defined methods covering authentication, market data, trading, and risk management.
 
 ## Basic Usage
 
@@ -21,7 +21,7 @@ The WebsockexAdapter.JsonRpc module provides a `defrpc` macro that automatically
 
 # Use macro-generated methods
 {:ok, request} = DeribitAdapter.get_instruments(%{currency: "BTC", kind: "future"})
-:ok = WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(request))
+:ok = ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(request))
 ```
 
 ## Market Making Workflows
@@ -75,8 +75,8 @@ def place_quotes(adapter, instrument, bid_price, ask_price, size) do
   })
   
   # Send both orders
-  :ok = WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(buy_req))
-  :ok = WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(sell_req))
+  :ok = ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(buy_req))
+  :ok = ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(sell_req))
 end
 ```
 
@@ -176,7 +176,7 @@ end
 ```elixir
 # Enable cancel-on-disconnect (critical for market makers)
 {:ok, cod_req} = DeribitAdapter.enable_cancel_on_disconnect()
-:ok = WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(cod_req))
+:ok = ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(cod_req))
 
 # Panic button - cancel everything
 def emergency_cancel_all(adapter) do
@@ -184,7 +184,7 @@ def emergency_cancel_all(adapter) do
   
   Enum.each(currencies, fn currency ->
     {:ok, cancel_req} = DeribitAdapter.cancel_all(%{currency: currency})
-    WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(cancel_req))
+    ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(cancel_req))
   end)
 end
 ```
@@ -194,7 +194,7 @@ end
 ```elixir
 # Set up heartbeat to prevent disconnection
 {:ok, heartbeat_req} = DeribitAdapter.set_heartbeat(%{interval: 30})
-:ok = WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(heartbeat_req))
+:ok = ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(heartbeat_req))
 
 # The adapter will automatically respond to test_request messages
 # This prevents order cancellation due to connection timeout
@@ -221,7 +221,7 @@ def place_ladder_orders(adapter, instrument, base_price, count, spacing, size) d
   
   # Send all orders
   Enum.each(buy_orders, fn order ->
-    WebsockexAdapter.Client.send_message(adapter.client, Jason.encode!(order))
+    ZenWebsocket.Client.send_message(adapter.client, Jason.encode!(order))
     Process.sleep(50) # Rate limiting
   end)
 end

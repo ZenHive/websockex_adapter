@@ -1,25 +1,25 @@
-# WebsockexAdapter Examples
+# ZenWebsocket Examples
 
-This guide provides practical examples of using WebsockexAdapter in various scenarios. All examples are fully tested and available in the `lib/websockex_adapter/examples/` directory.
+This guide provides practical examples of using ZenWebsocket in various scenarios. All examples are fully tested and available in the `lib/zen_websocket/examples/` directory.
 
 ## Working Examples
 
 All examples have comprehensive test coverage and demonstrate real-world usage patterns:
 
 ### Core Examples (in `examples/docs/`)
-- **[Basic Usage](../lib/websockex_adapter/examples/docs/basic_usage.ex)** - Basic connection and messaging patterns ([tests](../test/websockex_adapter/examples/basic_usage_test.exs))
-- **[Error Handling](../lib/websockex_adapter/examples/docs/error_handling.ex)** - Robust error recovery patterns ([tests](../test/websockex_adapter/examples/error_handling_test.exs))
-- **[JSON-RPC Client](../lib/websockex_adapter/examples/docs/json_rpc_client.ex)** - JSON-RPC 2.0 protocol usage
-- **[Subscription Management](../lib/websockex_adapter/examples/docs/subscription_management.ex)** - Channel subscription patterns ([tests](../test/websockex_adapter/examples/subscription_management_test.exs))
+- **[Basic Usage](../lib/zen_websocket/examples/docs/basic_usage.ex)** - Basic connection and messaging patterns ([tests](../test/zen_websocket/examples/basic_usage_test.exs))
+- **[Error Handling](../lib/zen_websocket/examples/docs/error_handling.ex)** - Robust error recovery patterns ([tests](../test/zen_websocket/examples/error_handling_test.exs))
+- **[JSON-RPC Client](../lib/zen_websocket/examples/docs/json_rpc_client.ex)** - JSON-RPC 2.0 protocol usage
+- **[Subscription Management](../lib/zen_websocket/examples/docs/subscription_management.ex)** - Channel subscription patterns ([tests](../test/zen_websocket/examples/subscription_management_test.exs))
 
 ### Platform Adapters
 - **Platform Adapter Template** - Template for creating platform-specific adapters (see platform_adapter_template.ex)
 - **Deribit Integration** - Complete examples moved to market_maker project for better separation of concerns
 
 ### Architecture Examples
-- **[Adapter Supervisor](../lib/websockex_adapter/examples/adapter_supervisor.ex)** - Fault-tolerant supervision patterns
-- **[Supervised Client](../lib/websockex_adapter/examples/supervised_client.ex)** - Client supervision with restart strategies
-- **[Usage Patterns](../lib/websockex_adapter/examples/usage_patterns.ex)** - Common WebSocket patterns and best practices
+- **[Adapter Supervisor](../lib/zen_websocket/examples/adapter_supervisor.ex)** - Fault-tolerant supervision patterns
+- **[Supervised Client](../lib/zen_websocket/examples/supervised_client.ex)** - Client supervision with restart strategies
+- **[Usage Patterns](../lib/zen_websocket/examples/usage_patterns.ex)** - Common WebSocket patterns and best practices
 
 ## Running the Examples
 
@@ -27,7 +27,7 @@ All examples have comprehensive test coverage and demonstrate real-world usage p
 
 ```bash
 # Run the basic usage example test
-mix test test/websockex_adapter/examples/basic_usage_test.exs
+mix test test/zen_websocket/examples/basic_usage_test.exs
 
 # Or run it in IEx
 iex -S mix
@@ -35,7 +35,7 @@ iex -S mix
 
 ```elixir
 # In IEx, try the basic usage example
-alias WebsockexAdapter.Examples.Docs.BasicUsage
+alias ZenWebsocket.Examples.Docs.BasicUsage
 
 # Echo server example
 {:ok, result} = BasicUsage.echo_example()
@@ -53,16 +53,16 @@ For comprehensive platform integration examples (including Deribit), see the `ma
 - Trading operations
 - Error handling and reconnection
 
-The WebsockexAdapter library provides the infrastructure, while platform-specific business logic resides in dedicated projects.
+The ZenWebsocket library provides the infrastructure, while platform-specific business logic resides in dedicated projects.
 
 ## Example Patterns
 
 ### Error Recovery Pattern
 
-See [error_handling.ex](../lib/websockex_adapter/examples/docs/error_handling.ex) for a complete implementation:
+See [error_handling.ex](../lib/zen_websocket/examples/docs/error_handling.ex) for a complete implementation:
 
 ```elixir
-alias WebsockexAdapter.Examples.Docs.ErrorHandling
+alias ZenWebsocket.Examples.Docs.ErrorHandling
 
 # Start a resilient client
 {:ok, client} = ErrorHandling.start_link("wss://echo.websocket.org")
@@ -75,10 +75,10 @@ alias WebsockexAdapter.Examples.Docs.ErrorHandling
 
 ### Subscription Management Pattern
 
-See [subscription_management.ex](../lib/websockex_adapter/examples/docs/subscription_management.ex) for implementation:
+See [subscription_management.ex](../lib/zen_websocket/examples/docs/subscription_management.ex) for implementation:
 
 ```elixir
-alias WebsockexAdapter.Examples.Docs.SubscriptionManagement
+alias ZenWebsocket.Examples.Docs.SubscriptionManagement
 
 # Start a client with managed subscriptions
 {:ok, manager} = SubscriptionManagement.start_link("wss://test.deribit.com/ws/api/v2")
@@ -93,10 +93,10 @@ subscriptions = SubscriptionManagement.list_subscriptions(manager)
 
 ### JSON-RPC Pattern
 
-See [json_rpc_client.ex](../lib/websockex_adapter/examples/docs/json_rpc_client.ex) for implementation:
+See [json_rpc_client.ex](../lib/zen_websocket/examples/docs/json_rpc_client.ex) for implementation:
 
 ```elixir
-alias WebsockexAdapter.Examples.Docs.JsonRpcClient
+alias ZenWebsocket.Examples.Docs.JsonRpcClient
 
 # Start a JSON-RPC client
 {:ok, client} = JsonRpcClient.start_link("wss://api.example.com/jsonrpc")
@@ -112,13 +112,13 @@ All examples come with comprehensive tests. To run them:
 
 ```bash
 # Run all example tests
-mix test test/websockex_adapter/examples/
+mix test test/zen_websocket/examples/
 
 # Run specific example test
-mix test test/websockex_adapter/examples/basic_usage_test.exs
+mix test test/zen_websocket/examples/basic_usage_test.exs
 
 # Run with coverage
-mix test --cover test/websockex_adapter/examples/
+mix test --cover test/zen_websocket/examples/
 ```
 
 ## Best Practices
@@ -148,4 +148,4 @@ To create an adapter for your platform:
 - [Architecture Overview](Architecture.md)
 - [Building Custom Adapters](guides/building_adapters.md)
 - [Troubleshooting Reconnection](guides/troubleshooting_reconnection.md)
-- [API Documentation](https://hexdocs.pm/websockex_adapter)
+- [API Documentation](https://hexdocs.pm/zen_websocket)

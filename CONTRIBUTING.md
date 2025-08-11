@@ -1,6 +1,6 @@
-# Contributing to WebsockexAdapter
+# Contributing to ZenWebsocket
 
-Thank you for your interest in contributing to WebsockexAdapter! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to ZenWebsocket! This document provides guidelines for contributing to the project.
 
 ## Code of Conduct
 
@@ -9,7 +9,7 @@ By participating in this project, you agree to abide by the [Hex.pm Code of Cond
 ## Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/websockex_adapter.git`
+2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/zen_websocket.git`
 3. Create a feature branch: `git checkout -b my-feature`
 4. Make your changes
 5. Run tests: `mix test`

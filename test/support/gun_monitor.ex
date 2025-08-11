@@ -1,4 +1,4 @@
-defmodule WebsockexAdapter.Test.Support.GunMonitor do
+defmodule ZenWebsocket.Test.Support.GunMonitor do
   @moduledoc """
   A simple monitor for Gun processes that intercepts and forwards messages.
 

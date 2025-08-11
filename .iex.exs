@@ -1,38 +1,38 @@
-# WebsockexAdapter Interactive Testing
+# ZenWebsocket Interactive Testing
 # ================================
 #
-# This file sets up an interactive environment for testing WebsockexAdapter library components.
+# This file sets up an interactive environment for testing ZenWebsocket library components.
 # It provides convenience functions for testing WebSocket connections, subscriptions,
 # reconnection logic, heartbeat functionality, and various error scenarios.
 #
 # Quick Start:
 #   iex -S mix
-#   WebsockexAdapterTest.quick_test()
+#   ZenWebsocketTest.quick_test()
 require Logger
-defmodule WebsockexAdapterTest do
+defmodule ZenWebsocketTest do
   @moduledoc """
-  Interactive testing module for WebsockexAdapter library.
+  Interactive testing module for ZenWebsocket library.
 
   ## Quick Start
 
       # Basic connection test
-      WebsockexAdapterTest.quick_test()
+      ZenWebsocketTest.quick_test()
 
       # Connect with debug mode
-      client = WebsockexAdapterTest.connect_debug()
+      client = ZenWebsocketTest.connect_debug()
 
       # Test heartbeat functionality
-      WebsockexAdapterTest.test_heartbeat()
+      ZenWebsocketTest.test_heartbeat()
 
       # Subscribe to channels
-      WebsockexAdapterTest.subscribe(client, ["deribit_price_index.btc_usd"])
+      ZenWebsocketTest.subscribe(client, ["deribit_price_index.btc_usd"])
 
       # Send custom messages
-      WebsockexAdapterTest.send_json(client, %{method: "public/test"})
+      ZenWebsocketTest.send_json(client, %{method: "public/test"})
   """
 
-  alias WebsockexAdapter.{Client, Config}
-  alias WebsockexAdapter.Examples.DeribitAdapter
+  alias ZenWebsocket.{Client, Config}
+  alias ZenWebsocket.Examples.DeribitAdapter
 
   @deribit_test_url "wss://test.deribit.com/ws/api/v2"
 
@@ -58,7 +58,7 @@ defmodule WebsockexAdapterTest do
     Logger.debug("📝 All messages will be printed to console")
 
     # Create a debug handler that prints all messages
-    debug_handler = WebsockexAdapter.MessageHandler.create_handler(
+    debug_handler = ZenWebsocket.MessageHandler.create_handler(
       on_message: fn
         {:message, {:text, json}} ->
           Logger.debug("\n📨 [TEXT MESSAGE] #{DateTime.utc_now() |> DateTime.to_string()}")
@@ -394,7 +394,7 @@ defmodule WebsockexAdapterTest do
 
   def quick_test do
     Logger.debug("""
-    🚀 Running WebsockexAdapter Quick Test
+    🚀 Running ZenWebsocket Quick Test
     ==================================
     """)
 
@@ -526,7 +526,7 @@ defmodule WebsockexAdapterTest do
   end
 
   defp create_debug_handler do
-    WebsockexAdapter.MessageHandler.create_handler(
+    ZenWebsocket.MessageHandler.create_handler(
       on_message: fn
         {:message, {:text, json}} ->
           Logger.debug("\n📨 [TEXT MESSAGE] #{DateTime.utc_now() |> DateTime.to_string()}")
@@ -559,7 +559,7 @@ defmodule WebsockexAdapterTest do
   end
 
   defp create_heartbeat_debug_handler do
-    WebsockexAdapter.MessageHandler.create_handler(
+    ZenWebsocket.MessageHandler.create_handler(
       on_message: fn
         {:message, {:text, json}} ->
           timestamp = DateTime.utc_now() |> DateTime.to_string()
@@ -626,44 +626,44 @@ defmodule WebsockexAdapterTest do
 
   def help do
     Logger.debug("""
-    WebsockexAdapter Interactive Testing with Heartbeat Support
+    ZenWebsocket Interactive Testing with Heartbeat Support
     =======================================================
 
     Quick Start:
-      client = WebsockexAdapterTest.connect()
-      WebsockexAdapterTest.quick_test()
+      client = ZenWebsocketTest.connect()
+      ZenWebsocketTest.quick_test()
 
     Debug Mode (see all messages):
-      client = WebsockexAdapterTest.connect_debug()
-      WebsockexAdapterTest.test_heartbeat()
+      client = ZenWebsocketTest.connect_debug()
+      ZenWebsocketTest.test_heartbeat()
 
     Heartbeat Testing:
-      WebsockexAdapterTest.test_automatic_heartbeat()            # Test automatic heartbeat (RECOMMENDED)
-      WebsockexAdapterTest.test_automatic_heartbeat(5)           # Test with 5 second interval
-      WebsockexAdapterTest.test_heartbeat()                      # Test manual heartbeat (legacy)
-      WebsockexAdapterTest.test_heartbeat_with_config()          # Test client-side config
+      ZenWebsocketTest.test_automatic_heartbeat()            # Test automatic heartbeat (RECOMMENDED)
+      ZenWebsocketTest.test_automatic_heartbeat(5)           # Test with 5 second interval
+      ZenWebsocketTest.test_heartbeat()                      # Test manual heartbeat (legacy)
+      ZenWebsocketTest.test_heartbeat_with_config()          # Test client-side config
 
     Gun Protocol Debugging:
-      WebsockexAdapterTest.test_gun_debug()                      # Complete Gun connection debug flow
-      WebsockexAdapterTest.test_gun_reconnection()               # Gun reconnection debug flow
+      ZenWebsocketTest.test_gun_debug()                      # Complete Gun connection debug flow
+      ZenWebsocketTest.test_gun_reconnection()               # Gun reconnection debug flow
 
     Connection Management:
-      WebsockexAdapterTest.connect()                             # Connect with defaults
-      WebsockexAdapterTest.connect_debug()                       # Connect with debug output
-      WebsockexAdapterTest.connect(timeout: 10_000)              # Connect with options
-      WebsockexAdapterTest.close(client)                         # Close connection
+      ZenWebsocketTest.connect()                             # Connect with defaults
+      ZenWebsocketTest.connect_debug()                       # Connect with debug output
+      ZenWebsocketTest.connect(timeout: 10_000)              # Connect with options
+      ZenWebsocketTest.close(client)                         # Close connection
 
     Message Operations:
-      WebsockexAdapterTest.send_json(client, %{method: "test"})  # Send JSON message
-      WebsockexAdapterTest.subscribe(client, ["channel"])        # Subscribe to channels
+      ZenWebsocketTest.send_json(client, %{method: "test"})  # Send JSON message
+      ZenWebsocketTest.subscribe(client, ["channel"])        # Subscribe to channels
 
     Testing & Monitoring:
-      WebsockexAdapterTest.test_error_scenarios()                # Test error handling
-      WebsockexAdapterTest.monitor_connection(client)            # Monitor connection state
-      WebsockexAdapterTest.test_internal_reconnection()          # Test auto-reconnection
+      ZenWebsocketTest.test_error_scenarios()                # Test error handling
+      ZenWebsocketTest.monitor_connection(client)            # Monitor connection state
+      ZenWebsocketTest.test_internal_reconnection()          # Test auto-reconnection
 
     Direct API:
-      WebsockexAdapter.Client.connect("wss://...")               # Direct client connection
+      ZenWebsocket.Client.connect("wss://...")               # Direct client connection
       DeribitAdapter.set_heartbeat(%{interval: 10})          # Get heartbeat request
       DeribitAdapter.test_request()                          # Get test request
 
@@ -682,4 +682,4 @@ defmodule WebsockexAdapterTest do
 end
 
 # Print help on startup
-WebsockexAdapterTest.help()
+ZenWebsocketTest.help()

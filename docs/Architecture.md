@@ -1,8 +1,8 @@
-# WebsockexAdapter Architecture
+# ZenWebsocket Architecture
 
 ## Overview
 
-WebsockexAdapter is a production-grade WebSocket client library built on top of the Gun HTTP/2 client. It provides a simple, reliable interface for WebSocket communications with a focus on financial trading systems.
+ZenWebsocket is a production-grade WebSocket client library built on top of the Gun HTTP/2 client. It provides a simple, reliable interface for WebSocket communications with a focus on financial trading systems.
 
 ## Core Design Principles
 

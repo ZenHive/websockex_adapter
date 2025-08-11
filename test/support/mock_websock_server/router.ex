@@ -1,5 +1,5 @@
 # Create a plug router for handling HTTP and WebSocket requests
-defmodule WebsockexAdapter.Test.Support.MockWebSockServer.Router do
+defmodule ZenWebsocket.Test.Support.MockWebSockServer.Router do
   use Plug.Router
 
   import Plug.Conn, only: [assign: 3, send_resp: 3]
@@ -35,7 +35,7 @@ defmodule WebsockexAdapter.Test.Support.MockWebSockServer.Router do
     conn =
       WebSockAdapter.upgrade(
         conn,
-        WebsockexAdapter.Test.Support.MockWebSockHandler,
+        ZenWebsocket.Test.Support.MockWebSockHandler,
         # Pass runtime PID
         [parent: server_pid],
         []

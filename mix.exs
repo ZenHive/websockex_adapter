@@ -1,11 +1,11 @@
-defmodule WebsockexAdapter.MixProject do
+defmodule ZenWebsocket.MixProject do
   use Mix.Project
 
   @version "0.1.1"
 
   def project do
     [
-      app: :websockex_adapter,
+      app: :zen_websocket,
       version: @version,
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
@@ -30,11 +30,11 @@ defmodule WebsockexAdapter.MixProject do
       package: package(),
 
       # Docs
-      name: "WebsockexAdapter",
-      source_url: "https://github.com/ZenHive/websockex_adapter",
-      homepage_url: "https://github.com/ZenHive/websockex_adapter",
+      name: "ZenWebsocket",
+      source_url: "https://github.com/ZenHive/zen_websocket",
+      homepage_url: "https://github.com/ZenHive/zen_websocket",
       docs: [
-        main: "WebsockexAdapter",
+        main: "ZenWebsocket",
         extras: [
           "README.md",
           "CHANGELOG.md",
@@ -61,7 +61,7 @@ defmodule WebsockexAdapter.MixProject do
           ],
           Testing: ["docs/stability_testing.md"]
         ],
-        source_url: "https://github.com/ZenHive/websockex_adapter",
+        source_url: "https://github.com/ZenHive/zen_websocket",
         source_ref: "v#{@version}"
       ]
     ]
@@ -158,12 +158,12 @@ defmodule WebsockexAdapter.MixProject do
 
   defp package do
     [
-      name: "websockex_adapter",
+      name: "zen_websocket",
       files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/ZenHive/websockex_adapter",
-        "Docs" => "https://hexdocs.pm/websockex_adapter"
+        "GitHub" => "https://github.com/ZenHive/zen_websocket",
+        "Docs" => "https://hexdocs.pm/zen_websocket"
       },
       maintainers: ["ZenHive"]
     ]

@@ -1,4 +1,4 @@
-# WebsockexAdapter Task List
+# ZenWebsocket Task List
 
 
 
@@ -38,7 +38,7 @@
 
 
 ## WebSocket Client Architecture
-WebsockexAdapter is a production-grade WebSocket client for financial trading systems. Built on Gun transport with 8 foundation modules for core functionality, now enhanced with critical financial infrastructure while maintaining strict quality constraints per module.
+ZenWebsocket is a production-grade WebSocket client for financial trading systems. Built on Gun transport with 8 foundation modules for core functionality, now enhanced with critical financial infrastructure while maintaining strict quality constraints per module.
 
 ## Integration Test Setup Notes
 - All tests use real WebSocket APIs (test.deribit.com)
@@ -66,7 +66,7 @@ WebsockexAdapter is a production-grade WebSocket client for financial trading sy
 
 
 ### WNX0026: Prepare for Hex.pm Publishing
-**Description**: Prepare WebsockexAdapter for publishing to Hex.pm as a production-ready package. Ensure all necessary documentation, metadata, and quality checks are in place for a successful package release.
+**Description**: Prepare ZenWebsocket for publishing to Hex.pm as a production-ready package. Ensure all necessary documentation, metadata, and quality checks are in place for a successful package release.
 
 **Simplicity Progression Plan**:
 1. Create essential documentation files (README.md, CHANGELOG.md)
@@ -238,7 +238,7 @@ Keep documentation focused and practical. Provide clear examples without overwhe
 ---
 
 ### WNX0028: Document Business Logic Separation Guidelines ✅ COMPLETED
-**Description**: Analyze existing examples in `lib/websockex_adapter/examples` and their tests to determine which contain business logic that should be moved to `../market_maker` versus infrastructure code that should remain as framework examples.
+**Description**: Analyze existing examples in `lib/zen_websocket/examples` and their tests to determine which contain business logic that should be moved to `../market_maker` versus infrastructure code that should remain as framework examples.
 
 **Examples Analysis for Business Logic Separation**:
 
@@ -259,7 +259,7 @@ Keep documentation focused and practical. Provide clear examples without overwhe
   - **Type**: Market Data Strategy
   - **Justification**: Business logic for efficiently managing multiple market data subscriptions (batch processing, rate limiting)
 
-**🔧 KEEP in `lib/websockex_adapter/examples`** (Infrastructure/Framework):
+**🔧 KEEP in `lib/zen_websocket/examples`** (Infrastructure/Framework):
 - **`adapter_supervisor.ex`** + tests (`supervised_client_test.exs`, `supervised_connection_test.exs`)
   - **Type**: Infrastructure - General supervision pattern, not business-specific
 - **`supervised_client.ex`** + test (`supervised_client_test.exs`)  
@@ -310,22 +310,22 @@ Clear separation of concerns keeps both projects focused on their core responsib
 - **Minimal Solution**: Clear documentation with concrete examples and migration paths
 - **Justification**:
   1. Prevents future PositionTracker/DeltaNeutralHedger situations
-  2. Keeps websockex_adapter reusable across different trading systems  
+  2. Keeps zen_websocket reusable across different trading systems  
   3. Maintains clean architectural boundaries
 
 **Requirements**:
-- ✅ Analyze all examples in `lib/websockex_adapter/examples` and tests
+- ✅ Analyze all examples in `lib/zen_websocket/examples` and tests
 - ✅ Categorize examples as business logic vs infrastructure
 - ✅ Create specific migration paths for business logic examples
 - ✅ Document benefits of separation
 - Document architectural decision criteria for future code
 
 **Benefits of This Separation**:
-1. **Clear Separation**: `websockex_adapter` becomes a pure WebSocket framework
+1. **Clear Separation**: `zen_websocket` becomes a pure WebSocket framework
 2. **Business Logic Isolation**: All trading/market-making logic moves to dedicated project
 3. **Reusability**: Framework examples remain as templates for other platforms
 4. **Maintainability**: Deribit-specific code can evolve independently
-5. **Dependency Management**: Market maker can depend on websockex_adapter, not vice versa
+5. **Dependency Management**: Market maker can depend on zen_websocket, not vice versa
 6. **Type Safety**: All business logic files have comprehensive typespecs for safe migration
 7. **Documentation**: Complete API documentation makes integration straightforward
 
@@ -339,7 +339,7 @@ Clear separation of concerns keeps both projects focused on their core responsib
 - ✅ Identified all Deribit-specific integration tests for migration
 - ✅ Verified infrastructure examples remain general-purpose
 - ✅ Documented test migration alongside code migration
-- Ensure no business logic remains in websockex_adapter after migration
+- Ensure no business logic remains in zen_websocket after migration
 
 **Typespec Requirements**:
 - Migration maintains all existing typespecs
@@ -382,12 +382,12 @@ Clear separation of concerns keeps both projects focused on their core responsib
 - Coupling reduction: Business logic isolated
 
 **Dependencies**
-- websockex_adapter: Pure framework dependencies
-- market_maker: Can depend on websockex_adapter
+- zen_websocket: Pure framework dependencies
+- market_maker: Can depend on zen_websocket
 - No circular dependencies after separation
 
 **Architecture Notes**
-- WebsockexAdapter: Connection, authentication transport, message handling, supervision patterns
+- ZenWebsocket: Connection, authentication transport, message handling, supervision patterns
 - Market Maker: Trading strategies, position tracking, risk management, Deribit-specific business logic
 - Clear boundary prevents coupling and maintains reusability
 - Examples demonstrate patterns, not specific trading strategies
@@ -427,7 +427,7 @@ Clear separation of concerns keeps both projects focused on their core responsib
 All other completed tasks have been moved to the archive. See [📁 Archive](docs/archive/completed_tasks.md) for detailed task specifications, implementation notes, and architectural decisions.
 
 ## Implementation Notes
-WebsockexAdapter provides production-grade WebSocket functionality for financial trading systems with emphasis on simplicity, reliability, and real-world testing. All implementations follow strict complexity budgets and proven patterns.
+ZenWebsocket provides production-grade WebSocket functionality for financial trading systems with emphasis on simplicity, reliability, and real-world testing. All implementations follow strict complexity budgets and proven patterns.
 
 ## Platform Integration Notes
 Primary integration with Deribit cryptocurrency exchange platform providing authentication, heartbeat handling, order management, and market data subscriptions. Architecture supports additional platforms through helper module pattern.

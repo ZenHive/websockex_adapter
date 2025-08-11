@@ -1,4 +1,4 @@
-defmodule WebsockexAdapter.Test.Support.CertificateHelper do
+defmodule ZenWebsocket.Test.Support.CertificateHelper do
   @moduledoc """
   Helper for generating self-signed certificates for testing TLS connections.
 

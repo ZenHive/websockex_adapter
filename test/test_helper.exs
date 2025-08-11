@@ -23,7 +23,7 @@ TERMINATION ("you are fired!") and your employment will be terminated.
 \n
 """)
 
-# WebsockexAdapter uses a simpler architecture without complex behaviors
+# ZenWebsocket uses a simpler architecture without complex behaviors
 # Only mock what's actually needed for testing
 
 # Mox.set_mox_global()

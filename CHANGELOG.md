@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.1] - 2025-05-24
 
 ### Added
-- Initial release of WebsockexAdapter
+- Initial release of ZenWebsocket
 - Core WebSocket client implementation with Gun transport
 - Automatic reconnection with exponential backoff
 - Comprehensive error handling and categorization
@@ -34,5 +34,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-world tested against live WebSocket endpoints
 - Strict code quality standards (max 5 functions per module, 15 lines per function)
 
-[Unreleased]: https://github.com/ZenHive/websockex_adapter/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/ZenHive/websockex_adapter/releases/tag/v0.1.1
+[Unreleased]: https://github.com/ZenHive/zen_websocket/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ZenHive/zen_websocket/releases/tag/v0.1.1

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide helps diagnose and resolve common reconnection issues in WebsockexAdapter. It covers debugging techniques, performance considerations, and monitoring strategies for production deployments.
+This guide helps diagnose and resolve common reconnection issues in ZenWebsocket. It covers debugging techniques, performance considerations, and monitoring strategies for production deployments.
 
 ## Common Reconnection Issues
 

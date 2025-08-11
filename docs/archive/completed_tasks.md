@@ -1,4 +1,4 @@
-# WebsockexAdapter Completed Tasks Archive
+# ZenWebsocket Completed Tasks Archive
 
 **Archive Date**: May 23, 2025  
 **Status**: All Phase 1-4 core tasks completed successfully
@@ -10,7 +10,7 @@
 #### WNX0010: Minimal WebSocket Client Module
 **Priority**: Critical | **Effort**: Medium | **Dependencies**: None
 
-**Target Implementation**: Single `WebsockexAdapter.Client` module with 5 essential functions
+**Target Implementation**: Single `ZenWebsocket.Client` module with 5 essential functions
 - `connect(url, opts \\ [])` - Establish WebSocket connection
 - `send(client, message)` - Send text/binary message  
 - `close(client)` - Close connection gracefully
@@ -18,7 +18,7 @@
 - `get_state(client)` - Get current connection state
 
 **Subtasks Completed**:
-- [x] **WNX0010a**: Create `lib/websockex_adapter/` directory structure
+- [x] **WNX0010a**: Create `lib/zen_websocket/` directory structure
 - [x] **WNX0010b**: Implement Gun-based connection establishment in `client.ex`
 - [x] **WNX0010c**: Add message sending with basic frame encoding
 - [x] **WNX0010d**: Implement graceful connection closing
@@ -34,7 +34,7 @@
 
 **Target Implementation**: Simple configuration struct with 6 essential fields:
 ```elixir
-%WebsockexAdapter.Config{
+%ZenWebsocket.Config{
   url: "wss://...",
   headers: [],
   timeout: 5000,
@@ -164,10 +164,10 @@ handle_message({:binary, data}, state) -> route_binary(data, state)
 
 **Target Implementation**: Telemetry events for monitoring:
 ```elixir
-[:websockex_adapter, :connection, :start]
-[:websockex_adapter, :connection, :stop]  
-[:websockex_adapter, :message, :received]
-[:websockex_adapter, :error, :occurred]
+[:zen_websocket, :connection, :start]
+[:zen_websocket, :connection, :stop]  
+[:zen_websocket, :message, :received]
+[:zen_websocket, :error, :occurred]
 ```
 
 **Subtasks Completed**:
@@ -494,7 +494,7 @@ Without request correlation, you can't reliably know if orders succeeded or fail
 
 **Dependencies**
 - ets: Built-in Erlang table storage
-- websockex_adapter: Core WebSocket client
+- zen_websocket: Core WebSocket client
 - jason: JSON encoding/decoding
 
 **Architecture Notes**
@@ -619,7 +619,7 @@ Rate limiting prevents API bans that cause missed trading opportunities. Single 
 
 **Dependencies**
 - ets: Built-in Erlang table storage
-- websockex_adapter: Core WebSocket client
+- zen_websocket: Core WebSocket client
 
 **Architecture Notes**
 - Token bucket algorithm is industry standard for rate limiting
@@ -755,7 +755,7 @@ Current architecture has duplicate reconnection mechanisms creating redundant at
 - Test coverage: 100% with real API testing
 
 **Dependencies**
-- websockex_adapter: Core WebSocket client
+- zen_websocket: Core WebSocket client
 
 **Architecture Notes**
 - Simple boolean configuration flag eliminates reconnection duplication
@@ -777,7 +777,7 @@ defp do_connect(state) do
     heartbeat_config: %{type: :deribit, interval: 30_000}
   ]
   
-  case WebsockexAdapter.Client.connect(state.url, opts) do
+  case ZenWebsocket.Client.connect(state.url, opts) do
     {:ok, client} ->
       ref = Process.monitor(client.server_pid)
       {:ok, %{state | client: client, monitor_ref: ref}}
@@ -851,7 +851,7 @@ Process crash   → Adapter creates new Client → Adapter controls reconnection
 **Simplicity Principle**: Simple GenServer that queues and batches subscription requests with configurable batch size and delay.
 
 **Requirements**:
-- Create `lib/websockex_adapter/examples/batch_subscription_manager.ex` ✅
+- Create `lib/zen_websocket/examples/batch_subscription_manager.ex` ✅
 - Implement subscription batching with configurable batch size (e.g., 10 channels at a time) ✅
 - Add delay between batches to respect API limits ✅
 - Show progress tracking and error handling ✅
@@ -910,7 +910,7 @@ channels = for i <- 1..50, do: "book.BTC-#{i}JUN25.raw"
 **Simplicity Principle**: GenServer that maintains position state from trades and provides risk metrics without complex portfolio theory.
 
 **Requirements**:
-- Create `lib/websockex_adapter/examples/position_tracker.ex` ✅
+- Create `lib/zen_websocket/examples/position_tracker.ex` ✅
 - Track positions across multiple instruments (futures & options) ✅
 - Calculate real-time P&L using mark prices ✅
 - Monitor margin requirements and liquidation levels ✅
@@ -965,7 +965,7 @@ PositionTracker.subscribe_updates(tracker, self())
 **Simplicity Principle**: Show core hedging logic without complex portfolio optimization or multi-leg strategies.
 
 **Requirements**:
-- Create `lib/websockex_adapter/examples/delta_neutral_hedger.ex` ✅
+- Create `lib/zen_websocket/examples/delta_neutral_hedger.ex` ✅
 - Monitor positions across multiple instruments ✅
 - Calculate dollar exposures using real-time prices ✅
 - Execute hedge trades to maintain neutrality ✅

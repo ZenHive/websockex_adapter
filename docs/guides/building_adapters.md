@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide explains how to build exchange adapters for WebsockexAdapter. Exchange adapters provide platform-specific functionality on top of the core WebSocket client, including authentication, subscription management, and state restoration.
+This guide explains how to build exchange adapters for ZenWebsocket. Exchange adapters provide platform-specific functionality on top of the core WebSocket client, including authentication, subscription management, and state restoration.
 
 ## Adapter Template
 
@@ -13,7 +13,7 @@ defmodule YourExchange.Adapter do
   use GenServer
   require Logger
   
-  alias WebsockexAdapter.Client
+  alias ZenWebsocket.Client
   
   # Public API
   
@@ -249,7 +249,7 @@ end
 Study the production-ready Deribit adapter for a complete implementation:
 
 ```elixir
-# From lib/websockex_adapter/examples/deribit_genserver_adapter.ex
+# From lib/zen_websocket/examples/deribit_genserver_adapter.ex
 
 defp do_connect(state) do
   # Parse URL for testnet/mainnet

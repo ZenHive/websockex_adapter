@@ -2,12 +2,12 @@
 
 ## Overview
 
-WebsockexAdapter implements a dual-layer reconnection architecture that provides both network-level and process-level reliability. This design leverages Gun's flexible process ownership model to ensure robust connection management for financial trading systems.
+ZenWebsocket implements a dual-layer reconnection architecture that provides both network-level and process-level reliability. This design leverages Gun's flexible process ownership model to ensure robust connection management for financial trading systems.
 
 ## Dual-Layer Design Rationale
 
 ### Layer 1: Client-Level Reconnection (Network Recovery)
-The `WebsockexAdapter.Client` GenServer provides built-in reconnection for network-level failures:
+The `ZenWebsocket.Client` GenServer provides built-in reconnection for network-level failures:
 - Handles temporary network outages
 - Manages WebSocket protocol errors
 - Preserves connection state during recovery
@@ -180,7 +180,7 @@ Resume trading operations
 
 ### Client Configuration
 ```elixir
-defmodule WebsockexAdapter.Config do
+defmodule ZenWebsocket.Config do
   defstruct [
     # ... other fields ...
     reconnect_on_error: true,  # Default: enabled for standalone use
@@ -219,5 +219,5 @@ end
 - [Building Adapters Guide](../guides/building_adapters.md)
 - [Troubleshooting Reconnection](../guides/troubleshooting_reconnection.md)
 - [Gun Integration Guide](../gun_integration.md)
-- [Client Module Documentation](../../lib/websockex_adapter/client.ex)
-- [DeribitGenServerAdapter Example](../../lib/websockex_adapter/examples/deribit_genserver_adapter.ex)
+- [Client Module Documentation](../../lib/zen_websocket/client.ex)
+- [DeribitGenServerAdapter Example](../../lib/zen_websocket/examples/deribit_genserver_adapter.ex)

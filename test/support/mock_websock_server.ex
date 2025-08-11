@@ -1,6 +1,6 @@
-defmodule WebsockexAdapter.Test.Support.MockWebSockServer do
+defmodule ZenWebsocket.Test.Support.MockWebSockServer do
   @moduledoc """
-  A simple WebSocket server for testing WebsockexAdapter clients.
+  A simple WebSocket server for testing ZenWebsocket clients.
 
   This server:
   - Starts on a dynamic port by default
@@ -32,9 +32,9 @@ defmodule WebsockexAdapter.Test.Support.MockWebSockServer do
   @default_path "/ws"
   defp get_tls_options do
     # Use certificate helper if available
-    if Code.ensure_loaded?(WebsockexAdapter.Test.Support.CertificateHelper) do
+    if Code.ensure_loaded?(ZenWebsocket.Test.Support.CertificateHelper) do
       # Generate temporary self-signed cert for testing
-      alias WebsockexAdapter.Test.Support.CertificateHelper
+      alias ZenWebsocket.Test.Support.CertificateHelper
 
       {cert_path, key_path} = CertificateHelper.generate_self_signed_certificate()
 
@@ -44,7 +44,7 @@ defmodule WebsockexAdapter.Test.Support.MockWebSockServer do
       ]
     else
       # Fallback to hard-coded test certificates if they exist
-      priv_dir = :code.priv_dir(:websockex_adapter)
+      priv_dir = :code.priv_dir(:zen_websocket)
       cert_file = Path.join([priv_dir, "test_certs", "server.crt"])
       key_file = Path.join([priv_dir, "test_certs", "server.key"])
 

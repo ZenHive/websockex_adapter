@@ -93,7 +93,7 @@ Once the Client GenServer refactor enables heartbeat functionality, clustering b
 #### Keep Heartbeats Local + Cluster Coordination
 ```elixir
 # Each connection handles its own heartbeats locally
-defmodule WebsockexAdapter.Pool.Connection do
+defmodule ZenWebsocket.Pool.Connection do
   @doc "Each connection handles heartbeats locally"
   def start_connection(exchange_config, pool_name) do
     # Start connection with local heartbeat handling
@@ -112,7 +112,7 @@ end
 
 #### Cluster-Wide Health Monitoring
 ```elixir
-defmodule WebsockexAdapter.Pool.HeartbeatMonitor do
+defmodule ZenWebsocket.Pool.HeartbeatMonitor do
   @doc "Monitor heartbeat health across entire connection pool"
   def monitor_pool_health(pool_name) do
     pool_connections = get_pool_connections(pool_name)
@@ -194,7 +194,7 @@ end
 
 #### Pool-Level Failover Coordination
 ```elixir
-defmodule WebsockexAdapter.Pool.FailoverCoordinator do
+defmodule ZenWebsocket.Pool.FailoverCoordinator do
   @doc "Replace failed connections in pool"
   def handle_heartbeat_failure(connection_id, pool_name) do
     # Remove failed connection from pool

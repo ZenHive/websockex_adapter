@@ -1,6 +1,6 @@
 # Gun Integration Guide
 
-This guide covers the integration of the [Gun](https://github.com/ninenines/gun) HTTP/WebSocket client in WebsockexAdapter, focusing on connection management, process monitoring, and ownership transfer.
+This guide covers the integration of the [Gun](https://github.com/ninenines/gun) HTTP/WebSocket client in ZenWebsocket, focusing on connection management, process monitoring, and ownership transfer.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -11,21 +11,21 @@ This guide covers the integration of the [Gun](https://github.com/ninenines/gun)
 
 ## Overview
 
-WebsockexAdapter uses Gun as its underlying transport layer for WebSocket connections. Gun provides robust HTTP and WebSocket protocol implementation with features like:
+ZenWebsocket uses Gun as its underlying transport layer for WebSocket connections. Gun provides robust HTTP and WebSocket protocol implementation with features like:
 - HTTP/1.1, HTTP/2, and WebSocket support
 - Automatic reconnection capabilities
 - Comprehensive TLS options
 - Message streaming and multiplexing
 
-The `WebsockexAdapter.Client` module will be refactored to a GenServer that owns the Gun connection and manages message routing.
+The `ZenWebsocket.Client` module will be refactored to a GenServer that owns the Gun connection and manages message routing.
 
 ## Process Monitoring vs. Linking
 
 Gun gives developers the choice between using process links and monitors for tracking connection processes:
 
-### Why WebsockexAdapter Uses Monitors
+### Why ZenWebsocket Uses Monitors
 
-WebsockexAdapter uses Erlang's process monitoring (`Process.monitor/1`) instead of process linking for tracking Gun connections for several reasons:
+ZenWebsocket uses Erlang's process monitoring (`Process.monitor/1`) instead of process linking for tracking Gun connections for several reasons:
 
 1. **Resilience**: If a Gun process crashes, the monitoring process receives a message rather than crashing itself
 2. **Control**: More granular control over error handling and recovery
@@ -34,7 +34,7 @@ WebsockexAdapter uses Erlang's process monitoring (`Process.monitor/1`) instead 
 ### Current Implementation in Client
 
 ```elixir
-# In WebsockexAdapter.Client.connect/2
+# In ZenWebsocket.Client.connect/2
 {:ok, gun_pid} = :gun.open(host_charlist, port, gun_opts)
 monitor_ref = Process.monitor(gun_pid)
 
@@ -55,7 +55,7 @@ Gun provides await functions for synchronous operations, but they require carefu
 Gun's await functions check that the calling process has a monitor on the Gun connection:
 
 ```elixir
-# Current usage in WebsockexAdapter.Client
+# Current usage in ZenWebsocket.Client
 defp await_websocket_upgrade(gun_pid, stream_ref, timeout, monitor_ref) do
   case :gun.await(gun_pid, stream_ref, timeout, monitor_ref) do
     {:upgrade, [<<"websocket">>], _headers} -> :ok
@@ -72,7 +72,7 @@ end
 
 ## Ownership Transfer
 
-One of Gun's most powerful features is the ability to transfer connection ownership between processes. This is crucial for WebsockexAdapter's upcoming architecture where the Client GenServer needs to own the connection for message routing.
+One of Gun's most powerful features is the ability to transfer connection ownership between processes. This is crucial for ZenWebsocket's upcoming architecture where the Client GenServer needs to own the connection for message routing.
 
 ### When to Transfer Ownership
 
@@ -84,7 +84,7 @@ Ownership transfer is useful when:
 ### Implementation for Integrated Heartbeat
 
 ```elixir
-defmodule WebsockexAdapter.Client do
+defmodule ZenWebsocket.Client do
   use GenServer
   
   # Client GenServer owns the Gun connection
@@ -151,7 +151,7 @@ end
 ### 1. Always Use Monitors
 
 ```elixir
-# Good - WebsockexAdapter.Client pattern
+# Good - ZenWebsocket.Client pattern
 {:ok, gun_pid} = :gun.open(host, port, opts)
 monitor_ref = Process.monitor(gun_pid)
 
@@ -178,7 +178,7 @@ end
 The Client GenServer must own the Gun connection to receive messages:
 
 ```elixir
-defmodule WebsockexAdapter.Client do
+defmodule ZenWebsocket.Client do
   use GenServer
   
   # Gun messages come to the GenServer process
@@ -218,7 +218,7 @@ Always test how your application handles:
 
 ## Summary
 
-Gun's process monitoring and ownership features are critical for WebsockexAdapter's architecture. By having the Client GenServer own the Gun connection, we enable:
+Gun's process monitoring and ownership features are critical for ZenWebsocket's architecture. By having the Client GenServer own the Gun connection, we enable:
 - Integrated heartbeat processing and user message handling
 - Seamless reconnection with state preservation
 - Reliable heartbeat handling for financial trading

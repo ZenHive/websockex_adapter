@@ -1,8 +1,8 @@
-# WebsockexAdapter
+# ZenWebsocket
 
-[![Hex.pm](https://img.shields.io/hexpm/v/websockex_adapter.svg)](https://hex.pm/packages/websockex_adapter)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-purple.svg)](https://hexdocs.pm/websockex_adapter)
-[![License](https://img.shields.io/hexpm/l/websockex_adapter.svg)](https://github.com/ZenHive/websockex_adapter/blob/main/LICENSE)
+[![Hex.pm](https://img.shields.io/hexpm/v/zen_websocket.svg)](https://hex.pm/packages/zen_websocket)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-purple.svg)](https://hexdocs.pm/zen_websocket)
+[![License](https://img.shields.io/hexpm/l/zen_websocket.svg)](https://github.com/ZenHive/zen_websocket/blob/main/LICENSE)
 
 A robust WebSocket client library for Elixir, built on Gun transport for production-grade reliability. Designed for financial APIs with automatic reconnection, comprehensive error handling, and real-world testing.
 
@@ -20,12 +20,12 @@ A robust WebSocket client library for Elixir, built on Gun transport for product
 
 ## Installation
 
-Add `websockex_adapter` to your dependencies in `mix.exs`:
+Add `zen_websocket` to your dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:websockex_adapter, "~> 0.1.1"}
+    {:zen_websocket, "~> 0.1.1"}
   ]
 end
 ```
@@ -36,13 +36,13 @@ end
 
 ```elixir
 # Connect to a WebSocket endpoint
-{:ok, client} = WebsockexAdapter.Client.connect("wss://echo.websocket.org", [
+{:ok, client} = ZenWebsocket.Client.connect("wss://echo.websocket.org", [
   timeout: 5000,
   heartbeat_interval: 30000
 ])
 
 # Send a message
-{:ok, _} = WebsockexAdapter.Client.send_message(client, "Hello, WebSocket!")
+{:ok, _} = ZenWebsocket.Client.send_message(client, "Hello, WebSocket!")
 
 # Receive messages in your process
 receive do
@@ -50,7 +50,7 @@ receive do
 end
 
 # Close the connection
-:ok = WebsockexAdapter.Client.close(client)
+:ok = ZenWebsocket.Client.close(client)
 ```
 
 For more detailed examples, see our working examples with fully tested implementations:
@@ -59,7 +59,7 @@ For more detailed examples, see our working examples with fully tested implement
 - **JSON-RPC Client** - JSON-RPC 2.0 protocol usage
 - **Subscription Management** - Channel subscription patterns
 
-See the [Examples Guide](https://hexdocs.pm/websockex_adapter/Examples.html) for complete code samples and usage patterns.
+See the [Examples Guide](https://hexdocs.pm/zen_websocket/Examples.html) for complete code samples and usage patterns.
 
 ### Deribit Integration
 
@@ -72,16 +72,16 @@ config = %{
 }
 
 # Start the supervised adapter
-{:ok, adapter} = WebsockexAdapter.Examples.DeribitGenServerAdapter.start_link(config)
+{:ok, adapter} = ZenWebsocket.Examples.DeribitGenServerAdapter.start_link(config)
 
 # Subscribe to market data
-{:ok, _} = WebsockexAdapter.Examples.DeribitGenServerAdapter.subscribe(
+{:ok, _} = ZenWebsocket.Examples.DeribitGenServerAdapter.subscribe(
   adapter,
   ["book.BTC-PERPETUAL.raw", "trades.BTC-PERPETUAL.raw"]
 )
 
 # Place an order
-{:ok, order} = WebsockexAdapter.Examples.DeribitGenServerAdapter.place_order(adapter, %{
+{:ok, order} = ZenWebsocket.Examples.DeribitGenServerAdapter.place_order(adapter, %{
   instrument_name: "BTC-PERPETUAL",
   amount: 10,
   type: "limit",
@@ -92,17 +92,17 @@ config = %{
 
 ## Architecture
 
-WebsockexAdapter follows a modular architecture with clear separation of concerns:
+ZenWebsocket follows a modular architecture with clear separation of concerns:
 
 ```
-WebsockexAdapter.Client         # Main client interface
-WebsockexAdapter.Config         # Configuration management
-WebsockexAdapter.Frame          # WebSocket frame handling
-WebsockexAdapter.Reconnection   # Automatic reconnection logic
-WebsockexAdapter.MessageHandler # Message parsing and routing
-WebsockexAdapter.ErrorHandler   # Error categorization
-WebsockexAdapter.RateLimiter   # API rate limiting
-WebsockexAdapter.JsonRpc       # JSON-RPC 2.0 protocol
+ZenWebsocket.Client         # Main client interface
+ZenWebsocket.Config         # Configuration management
+ZenWebsocket.Frame          # WebSocket frame handling
+ZenWebsocket.Reconnection   # Automatic reconnection logic
+ZenWebsocket.MessageHandler # Message parsing and routing
+ZenWebsocket.ErrorHandler   # Error categorization
+ZenWebsocket.RateLimiter   # API rate limiting
+ZenWebsocket.JsonRpc       # JSON-RPC 2.0 protocol
 ```
 
 ## Platform Integration
@@ -114,7 +114,7 @@ The library includes a complete Deribit adapter as a reference implementation. T
 3. Handle platform message formats
 4. Add comprehensive tests against the real API
 
-See `lib/websockex_adapter/examples/deribit_adapter.ex` for a complete example.
+See `lib/zen_websocket/examples/deribit_adapter.ex` for a complete example.
 
 ## Configuration Options
 
@@ -168,9 +168,9 @@ This project is licensed under the MIT License.
 
 ## Links
 
-- [Documentation](https://hexdocs.pm/websockex_adapter)
-- [Hex Package](https://hex.pm/packages/websockex_adapter)
-- [GitHub Repository](https://github.com/ZenHive/websockex_adapter)
+- [Documentation](https://hexdocs.pm/zen_websocket)
+- [Hex Package](https://hex.pm/packages/zen_websocket)
+- [GitHub Repository](https://github.com/ZenHive/zen_websocket)
 
 ## Acknowledgments
 

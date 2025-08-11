@@ -1,8 +1,8 @@
 defmodule Mix.Tasks.StabilityTest do
-  @shortdoc "Run WebsockexAdapter stability tests"
+  @shortdoc "Run ZenWebsocket stability tests"
 
   @moduledoc """
-  Runs stability tests for WebsockexAdapter with Deribit integration.
+  Runs stability tests for ZenWebsocket with Deribit integration.
 
   ## Usage
 
@@ -21,7 +21,7 @@ defmodule Mix.Tasks.StabilityTest do
   @impl Mix.Task
   def run(args) do
     # Start the application
-    Application.ensure_all_started(:websockex_adapter)
+    Application.ensure_all_started(:zen_websocket)
 
     # Parse arguments
     {opts, _, _} =
@@ -49,7 +49,7 @@ defmodule Mix.Tasks.StabilityTest do
       opts[:full] ->
         IO.puts("🚀 Starting 24-hour stability test...")
 
-        System.cmd("mix", ["test", "--only", "stability", "test/websockex_adapter/examples/deribit_stability_test.exs"],
+        System.cmd("mix", ["test", "--only", "stability", "test/zen_websocket/examples/deribit_stability_test.exs"],
           into: IO.stream(:stdio, :line)
         )
 
@@ -61,7 +61,7 @@ defmodule Mix.Tasks.StabilityTest do
 
         System.cmd(
           "mix",
-          ["test", "--only", "stability_dev", "test/websockex_adapter/examples/deribit_stability_dev_test.exs"],
+          ["test", "--only", "stability_dev", "test/zen_websocket/examples/deribit_stability_dev_test.exs"],
           into: IO.stream(:stdio, :line)
         )
 
@@ -70,7 +70,7 @@ defmodule Mix.Tasks.StabilityTest do
 
         System.cmd(
           "mix",
-          ["test", "--only", "stability_dev", "test/websockex_adapter/examples/deribit_stability_dev_test.exs"],
+          ["test", "--only", "stability_dev", "test/zen_websocket/examples/deribit_stability_dev_test.exs"],
           into: IO.stream(:stdio, :line)
         )
     end

@@ -1,6 +1,6 @@
-# WebsockexAdapter Stability Testing Guide
+# ZenWebsocket Stability Testing Guide
 
-This guide covers the stability testing capabilities for WebsockexAdapter, specifically designed for production-grade WebSocket connections with financial APIs.
+This guide covers the stability testing capabilities for ZenWebsocket, specifically designed for production-grade WebSocket connections with financial APIs.
 
 ## Overview
 
@@ -21,7 +21,7 @@ Quick validation test for development environments.
 mix stability_test
 
 # Or directly
-mix test --only stability_dev test/websockex_adapter/examples/deribit_stability_dev_test.exs
+mix test --only stability_dev test/zen_websocket/examples/deribit_stability_dev_test.exs
 ```
 
 ### 2. Production Stability Test (24 hours)
@@ -32,7 +32,7 @@ Comprehensive test for production validation.
 mix stability_test --full
 
 # Or directly
-mix test --only stability test/websockex_adapter/examples/deribit_stability_test.exs
+mix test --only stability test/zen_websocket/examples/deribit_stability_test.exs
 ```
 
 ## Prerequisites

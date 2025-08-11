@@ -1,16 +1,16 @@
-# WebsockexAdapter Supervision Strategy
+# ZenWebsocket Supervision Strategy
 
 ## Overview
 
-WebsockexAdapter provides optional supervision for WebSocket client connections, ensuring resilience and automatic recovery from failures. This is critical for financial trading systems where connection stability directly impacts order execution and risk management.
+ZenWebsocket provides optional supervision for WebSocket client connections, ensuring resilience and automatic recovery from failures. This is critical for financial trading systems where connection stability directly impacts order execution and risk management.
 
-**Important**: As a library, WebsockexAdapter does not start any supervisors automatically. You must explicitly add supervision to your application's supervision tree when needed.
+**Important**: As a library, ZenWebsocket does not start any supervisors automatically. You must explicitly add supervision to your application's supervision tree when needed.
 
 ## Architecture
 
 ```
 Your Application Supervisor
-    ├── WebsockexAdapter.ClientSupervisor (Optional DynamicSupervisor)
+    ├── ZenWebsocket.ClientSupervisor (Optional DynamicSupervisor)
     │       ├── Client GenServer 1
     │       ├── Client GenServer 2
     │       └── Client GenServer N
@@ -19,13 +19,13 @@ Your Application Supervisor
 
 ## Key Components
 
-### 1. ClientSupervisor (`WebsockexAdapter.ClientSupervisor`)
+### 1. ClientSupervisor (`ZenWebsocket.ClientSupervisor`)
 - DynamicSupervisor for managing client connections
 - Restart strategy: `:one_for_one` (isolated failures)
 - Maximum 10 restarts in 60 seconds (configurable)
 - Each client runs independently
 
-### 2. Client GenServer (`WebsockexAdapter.Client`)
+### 2. Client GenServer (`ZenWebsocket.Client`)
 - Manages individual WebSocket connections
 - Handles Gun process ownership and message routing
 - Integrated heartbeat handling
@@ -37,13 +37,13 @@ Your Application Supervisor
 
 ```elixir
 # Direct connection without supervision
-{:ok, client} = WebsockexAdapter.Client.connect("wss://example.com")
+{:ok, client} = ZenWebsocket.Client.connect("wss://example.com")
 
 # Use the client
-WebsockexAdapter.Client.send_message(client, "Hello")
+ZenWebsocket.Client.send_message(client, "Hello")
 
 # Clean up when done
-WebsockexAdapter.Client.close(client)
+ZenWebsocket.Client.close(client)
 ```
 
 ### Pattern 2: Using ClientSupervisor
@@ -56,8 +56,8 @@ defmodule MyApp.Application do
   
   def start(_type, _args) do
     children = [
-      # Add the WebsockexAdapter supervisor
-      WebsockexAdapter.ClientSupervisor,
+      # Add the ZenWebsocket supervisor
+      ZenWebsocket.ClientSupervisor,
       # Your other children...
     ]
     
@@ -70,10 +70,10 @@ Then create supervised connections:
 
 ```elixir
 # Basic supervised connection
-{:ok, client} = WebsockexAdapter.ClientSupervisor.start_client("wss://example.com")
+{:ok, client} = ZenWebsocket.ClientSupervisor.start_client("wss://example.com")
 
 # With configuration
-{:ok, client} = WebsockexAdapter.ClientSupervisor.start_client("wss://example.com",
+{:ok, client} = ZenWebsocket.ClientSupervisor.start_client("wss://example.com",
   retry_count: 10,
   heartbeat_config: %{type: :deribit, interval: 30_000}
 )
@@ -90,12 +90,12 @@ defmodule MyApp.Application do
   def start(_type, _args) do
     children = [
       # Supervise individual clients
-      {WebsockexAdapter.Client, [
+      {ZenWebsocket.Client, [
         url: "wss://exchange1.com",
         id: :exchange1_client,
         heartbeat_config: %{type: :deribit, interval: 30_000}
       ]},
-      {WebsockexAdapter.Client, [
+      {ZenWebsocket.Client, [
         url: "wss://exchange2.com", 
         id: :exchange2_client
       ]},
@@ -148,16 +148,16 @@ end
 ### 3. Monitoring
 ```elixir
 # List all supervised clients
-clients = WebsockexAdapter.ClientSupervisor.list_clients()
+clients = ZenWebsocket.ClientSupervisor.list_clients()
 
 # Check client health
-health = WebsockexAdapter.Client.get_heartbeat_health(client)
+health = ZenWebsocket.Client.get_heartbeat_health(client)
 ```
 
 ### 4. Graceful Shutdown
 ```elixir
 # Stop a specific client
-WebsockexAdapter.ClientSupervisor.stop_client(pid)
+ZenWebsocket.ClientSupervisor.stop_client(pid)
 
 # Client won't be restarted (normal termination)
 ```
@@ -200,10 +200,10 @@ defmodule TradingSystem.DeribitConnection do
       retry_delay: 1000
     ]
     
-    {:ok, client} = WebsockexAdapter.ClientSupervisor.start_client(url, config)
+    {:ok, client} = ZenWebsocket.ClientSupervisor.start_client(url, config)
     
     # Create adapter with supervised client
-    adapter = %WebsockexAdapter.Examples.DeribitAdapter{
+    adapter = %ZenWebsocket.Examples.DeribitAdapter{
       client: client,
       authenticated: false,
       subscriptions: MapSet.new(),
@@ -212,8 +212,8 @@ defmodule TradingSystem.DeribitConnection do
     }
     
     # Authenticate and subscribe
-    {:ok, adapter} = WebsockexAdapter.Examples.DeribitAdapter.authenticate(adapter)
-    {:ok, adapter} = WebsockexAdapter.Examples.DeribitAdapter.subscribe(adapter, [
+    {:ok, adapter} = ZenWebsocket.Examples.DeribitAdapter.authenticate(adapter)
+    {:ok, adapter} = ZenWebsocket.Examples.DeribitAdapter.subscribe(adapter, [
       "book.BTC-PERPETUAL.raw",
       "trades.BTC-PERPETUAL.raw",
       "user.orders.BTC-PERPETUAL.raw"
@@ -235,8 +235,8 @@ end
 
 ```
 YourApp.Supervisor
-    ├── WebsockexAdapter.Application
-    │   └── WebsockexAdapter.ClientSupervisor
+    ├── ZenWebsocket.Application
+    │   └── ZenWebsocket.ClientSupervisor
     │       ├── Client_1 (Deribit Production)
     │       ├── Client_2 (Deribit Test)
     │       └── Client_3 (Binance)

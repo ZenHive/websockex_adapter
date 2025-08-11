@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**WebsockexAdapter** is a robust WebSocket client library for Elixir, specifically designed for financial APIs (particularly Deribit cryptocurrency trading). Built on Gun transport, it started with 8 foundation modules and is now being enhanced with critical financial infrastructure while maintaining strict simplicity principles.
+**ZenWebsocket** is a robust WebSocket client library for Elixir, specifically designed for financial APIs (particularly Deribit cryptocurrency trading). Built on Gun transport, it started with 8 foundation modules and is now being enhanced with critical financial infrastructure while maintaining strict simplicity principles.
 
 **Financial Development Principle**: Start simple, add complexity only when necessary based on real data. This is a well-established principle in financial software development, especially for market making.
 
@@ -37,7 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 #### Foundation Modules (8 core - complete)
 ```
-lib/websockex_adapter/
+lib/zen_websocket/
 ├── client.ex              # Main client interface (5 public functions)
 ├── config.ex              # Configuration struct and validation
 ├── frame.ex               # WebSocket frame encoding/decoding  
@@ -61,11 +61,11 @@ lib/websockex_adapter/
 ### Public API (Only 5 Functions)
 ```elixir
 # Everything users need for WebSocket operations
-WebsockexAdapter.Client.connect(url, opts)
-WebsockexAdapter.Client.send_message(client, message) 
-WebsockexAdapter.Client.close(client)
-WebsockexAdapter.Client.subscribe(client, channels)
-WebsockexAdapter.Client.get_state(client)
+ZenWebsocket.Client.connect(url, opts)
+ZenWebsocket.Client.send_message(client, message) 
+ZenWebsocket.Client.close(client)
+ZenWebsocket.Client.subscribe(client, channels)
+ZenWebsocket.Client.get_state(client)
 ```
 
 ### Core Architecture Principles
@@ -144,7 +144,7 @@ export DERIBIT_CLIENT_SECRET="your_client_secret"
 ```
 
 ### Configuration Options
-WebsockexAdapter.Config supports 6 essential options:
+ZenWebsocket.Config supports 6 essential options:
 - `url` - WebSocket endpoint URL
 - `headers` - Connection headers  
 - `timeout` - Connection timeout (default: 5000ms)
@@ -164,7 +164,7 @@ WebsockexAdapter.Config supports 6 essential options:
 
 ### Test Structure
 ```
-test/websockex_adapter/           # Core module tests
+test/zen_websocket/           # Core module tests
 test/integration/             # Real API integration tests  
 test/support/                 # Shared test infrastructure
 ```
@@ -180,10 +180,10 @@ test/support/                 # Shared test infrastructure
 @tag :integration
 test "maintains subscriptions across reconnection", %{deribit_config: config} do
   # Use real Deribit testnet connection (no mocks)
-  {:ok, client} = WebsockexAdapter.Client.connect(config.url, config.opts)
+  {:ok, client} = ZenWebsocket.Client.connect(config.url, config.opts)
 
   # Subscribe to real market data
-  {:ok, _} = WebsockexAdapter.Client.subscribe(client, ["book.BTC-PERPETUAL.raw"])
+  {:ok, _} = ZenWebsocket.Client.subscribe(client, ["book.BTC-PERPETUAL.raw"])
   
   # Simulate connection drop
   Process.exit(client.gun_pid, :kill)
@@ -288,14 +288,14 @@ end
 ## WebSocket Connection Architecture
 
 ### Connection Model
-- WebSocket connections are Gun processes managed by WebsockexAdapter.Client
+- WebSocket connections are Gun processes managed by ZenWebsocket.Client
 - Connection processes are monitored, not owned by complex supervisors
 - Failures detected by `Process.monitor/1` and classified by exit reasons
 
 ### Reconnection Requirements
 **DO (Follow Established Pattern):**
 ```elixir
-{:ok, client} = WebsockexAdapter.Client.connect(url, [
+{:ok, client} = ZenWebsocket.Client.connect(url, [
   timeout: 5000,
   retry_count: 3,
   retry_delay: 1000,
@@ -319,7 +319,7 @@ Complete Deribit cryptocurrency exchange integration:
 - Cancel-on-disconnect protection
 - Supervised reconnection pattern (adapter handles all reconnection)
 
-Located in `lib/websockex_adapter/examples/deribit_adapter.ex`
+Located in `lib/zen_websocket/examples/deribit_adapter.ex`
 
 #### Reconnection Architecture Pattern
 When using adapters like `DeribitGenServerAdapter`, the reconnection responsibility is clearly divided:

@@ -1,4 +1,4 @@
-defmodule WebsockexAdapter.Test.Support.MockWebSockHandler do
+defmodule ZenWebsocket.Test.Support.MockWebSockHandler do
   @moduledoc """
   WebSock-based handler for the mock WebSocket server.
 
