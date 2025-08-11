@@ -61,7 +61,7 @@ defmodule ZenWebsocket.JsonRpcTest do
   describe "defrpc macro" do
     defmodule TestApi do
       @moduledoc false
-      use ZenWebsocket.JsonRpc
+      use JsonRpc
 
       defrpc(:authenticate, "public/auth")
       defrpc(:subscribe, "public/subscribe", doc: "Subscribe to market data channels")

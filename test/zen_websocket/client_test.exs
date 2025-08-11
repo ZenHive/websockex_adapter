@@ -9,8 +9,8 @@ defmodule ZenWebsocket.ClientTest do
   test "connect to test.deribit.com with URL string" do
     {:ok, client} = Client.connect(@deribit_test_url)
 
-    assert client.gun_pid != nil
-    assert client.stream_ref != nil
+    assert client.gun_pid
+    assert client.stream_ref
     assert client.state == :connected
     assert client.url == @deribit_test_url
 
@@ -21,8 +21,8 @@ defmodule ZenWebsocket.ClientTest do
     {:ok, config} = Config.new(@deribit_test_url, timeout: 10_000)
     {:ok, client} = Client.connect(config)
 
-    assert client.gun_pid != nil
-    assert client.stream_ref != nil
+    assert client.gun_pid
+    assert client.stream_ref
     assert client.state == :connected
     assert client.url == @deribit_test_url
 

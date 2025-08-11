@@ -274,7 +274,7 @@ defmodule ZenWebsocket.Examples.SupervisedConnectionTest do
 
       # Get managed client
       client = ConnectionManager.get_client(manager, "wss://echo.websocket.org")
-      assert client != nil
+      assert client
 
       # Use the client
       case Client.send_message(client, "managed message") do
@@ -318,7 +318,7 @@ defmodule ZenWebsocket.Examples.SupervisedConnectionTest do
             assert_receive {:websocket_message, _auth_response}, 5_000
 
           {:ok, auth_response} ->
-            assert auth_response["result"] != nil
+            assert auth_response["result"]
         end
 
         # Verify supervised connection stays alive

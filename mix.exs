@@ -1,7 +1,7 @@
 defmodule ZenWebsocket.MixProject do
   use Mix.Project
 
-  @version "0.1.1"
+  @version "0.1.2"
 
   def project do
     [
@@ -38,6 +38,7 @@ defmodule ZenWebsocket.MixProject do
         extras: [
           "README.md",
           "CHANGELOG.md",
+          "USAGE_RULES.md",
           "docs/Architecture.md",
           "docs/Examples.md",
           "docs/guides/building_adapters.md",
@@ -48,7 +49,7 @@ defmodule ZenWebsocket.MixProject do
           "docs/supervision_strategy.md"
         ],
         groups_for_extras: [
-          "Getting Started": ["README.md", "CHANGELOG.md", "docs/Examples.md"],
+          "Getting Started": ["README.md", "USAGE_RULES.md", "CHANGELOG.md", "docs/Examples.md"],
           Guides: [
             "docs/guides/building_adapters.md",
             "docs/guides/troubleshooting_reconnection.md"
@@ -96,7 +97,9 @@ defmodule ZenWebsocket.MixProject do
       {:ex_doc, "~> 0.31", only: :dev, runtime: false},
       {:doctor, "~> 0.22.0", only: :dev},
       # Tasks
-      {:task_validator, "~> 0.7.0", only: [:dev, :test], runtime: false},
+      {:task_validator, "~> 0.9.5", only: [:dev, :test], runtime: false},
+      # Usage rules for AI agents and documentation
+      {:usage_rules, "~> 0.1", only: :dev, runtime: false},
 
       # Security scanning
       {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
@@ -159,7 +162,7 @@ defmodule ZenWebsocket.MixProject do
   defp package do
     [
       name: "zen_websocket",
-      files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG* USAGE_RULES*),
       licenses: ["MIT"],
       links: %{
         "GitHub" => "https://github.com/ZenHive/zen_websocket",

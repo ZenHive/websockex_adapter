@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2025-08-11
+
+### Added
+- USAGE_RULES.md for AI agents and developer guidance
+- Mix task `zen_websocket.usage` to export usage rules
+- Mix task `zen_websocket.validate_usage` to validate code patterns
+- Integration with usage_rules library ecosystem
+- JSON export format for usage rules
+- Automated code validation for common anti-patterns
+
+### Improved
+- Documentation with clear usage patterns and examples
+- Package metadata for Hex.pm publishing
+
 ## [0.1.1] - 2025-05-24
 
 ### Added
@@ -34,5 +48,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-world tested against live WebSocket endpoints
 - Strict code quality standards (max 5 functions per module, 15 lines per function)
 
-[Unreleased]: https://github.com/ZenHive/zen_websocket/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/ZenHive/zen_websocket/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/ZenHive/zen_websocket/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ZenHive/zen_websocket/releases/tag/v0.1.1

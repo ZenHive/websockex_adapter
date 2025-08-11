@@ -10,7 +10,7 @@ defmodule ZenWebsocket.Examples.SubscriptionManagementTest do
     test "creates connection and sends subscription message" do
       {:ok, client, channels} = SubscriptionManagement.multi_channel_subscription()
 
-      assert %ZenWebsocket.Client{} = client
+      assert %Client{} = client
       assert channels == ["trades.BTC-USD", "orderbook.ETH-USD", "ticker.SOL-USD"]
 
       # Echo server should return our subscription message
