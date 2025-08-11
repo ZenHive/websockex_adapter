@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3] - 2025-08-11
+
+### Fixed
+- Compilation error in mix zen_websocket.validate_usage task (regex in module attributes)
+
 ## [0.1.2] - 2025-08-11
 
 ### Added
@@ -48,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-world tested against live WebSocket endpoints
 - Strict code quality standards (max 5 functions per module, 15 lines per function)
 
-[Unreleased]: https://github.com/ZenHive/zen_websocket/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/ZenHive/zen_websocket/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/ZenHive/zen_websocket/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/ZenHive/zen_websocket/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ZenHive/zen_websocket/releases/tag/v0.1.1

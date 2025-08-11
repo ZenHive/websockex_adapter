@@ -36,20 +36,24 @@ defmodule Mix.Tasks.ZenWebsocket.ValidateUsage do
 
   @allowed_functions ~w(connect send_message subscribe get_state close)a
 
-  @common_antipatterns [
-    {~r/defmodule.*use\s+WebSockex/, "Don't create wrapper modules - use Client directly"},
-    {~r/Process\.spawn.*Client\.connect/, "Use supervision patterns instead of manual spawning"},
-    {~r/:meck|:mock|Mock\./, "Never mock WebSocket connections - use real endpoints"},
-    {~r/try\s+do.*Client\.connect.*rescue/, "Don't rescue connection errors - handle {:error, reason}"},
-    {~r/Client\.\w+!\(/, "ZenWebsocket doesn't have bang functions - use pattern matching"},
-    {~r/defstruct.*websocket.*state/, "Don't maintain custom WebSocket state - use Client.get_state/1"},
-    {~r/GenServer\.call.*timeout:\s*:infinity/, "Always specify timeouts for WebSocket operations"}
-  ]
+  defp common_antipatterns do
+    [
+      {~r/defmodule.*use\s+WebSockex/, "Don't create wrapper modules - use Client directly"},
+      {~r/Process\.spawn.*Client\.connect/, "Use supervision patterns instead of manual spawning"},
+      {~r/:meck|:mock|Mock\./, "Never mock WebSocket connections - use real endpoints"},
+      {~r/try\s+do.*Client\.connect.*rescue/, "Don't rescue connection errors - handle {:error, reason}"},
+      {~r/Client\.\w+!\(/, "ZenWebsocket doesn't have bang functions - use pattern matching"},
+      {~r/defstruct.*websocket.*state/, "Don't maintain custom WebSocket state - use Client.get_state/1"},
+      {~r/GenServer\.call.*timeout:\s*:infinity/, "Always specify timeouts for WebSocket operations"}
+    ]
+  end
 
-  @deprecated_patterns [
-    {~r/WebsockexAdapter/, "Use ZenWebsocket instead of WebsockexAdapter"},
-    {~r/Websockex\./, "Migrate from Websockex to ZenWebsocket.Client"}
-  ]
+  defp deprecated_patterns do
+    [
+      {~r/WebsockexAdapter/, "Use ZenWebsocket instead of WebsockexAdapter"},
+      {~r/Websockex\./, "Migrate from Websockex to ZenWebsocket.Client"}
+    ]
+  end
 
   @impl Mix.Task
   def run(args) do
@@ -115,7 +119,7 @@ defmodule Mix.Tasks.ZenWebsocket.ValidateUsage do
   end
 
   defp find_antipatterns(file, content, lines) do
-    Enum.flat_map(@common_antipatterns, fn {pattern, message} ->
+    Enum.flat_map(common_antipatterns(), fn {pattern, message} ->
       case Regex.run(pattern, content, return: :index) do
         nil ->
           []
@@ -139,7 +143,7 @@ defmodule Mix.Tasks.ZenWebsocket.ValidateUsage do
   end
 
   defp find_deprecated(file, content, lines) do
-    Enum.flat_map(@deprecated_patterns, fn {pattern, message} ->
+    Enum.flat_map(deprecated_patterns(), fn {pattern, message} ->
       case Regex.run(pattern, content, return: :index) do
         nil ->
           []
